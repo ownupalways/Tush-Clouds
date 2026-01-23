@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand Colors - Lemon & Green Blend */
+  --color-brand-green: #14532D;
+  --color-brand-green-50: #f0fdf4;
+  --color-brand-green-100: #dcfce7;
+  --color-brand-green-200: #bbf7d0;
+  --color-brand-green-300: #86efac;
+  --color-brand-green-400: #4ade80;
+  --color-brand-green-500: #14532D;
+  --color-brand-green-600: #16a34a;
+  --color-brand-green-700: #15803d;
+  --color-brand-green-800: #166534;
+  --color-brand-green-900: #14532D;
+  
+  --color-brand-lemon: #FACC15;
+  --color-brand-lemon-50: #fefce8;
+  --color-brand-lemon-100: #fef9c3;
+  --color-brand-lemon-200: #fef08a;
+  --color-brand-lemon-300: #fde047;
+  --color-brand-lemon-400: #facc15;
+  --color-brand-lemon-500: #eab308;
+  --color-brand-lemon-600: #ca8a04;
+  --color-brand-lemon-700: #a16207;
+  --color-brand-lemon-800: #854d0e;
+  --color-brand-lemon-900: #713f12;
+  
+  --color-brand-ash: #F3F4F6;
+  
+  /* FIXED: Linear gradient syntax */
+  --color-linear-lemon-green: linear-gradient(135deg, #FACC15 0%, #14532D 100%);
+  
+  /* Custom font families */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Fira Code", "Courier New", monospace;
+}
+
+/* CSS Variables for dynamic theming (Controlled by ThemeProvider.tsx) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-color: #e5e7eb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* This block activates when ThemeProvider adds the 'dark' class to <html> */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #64748b;
+  --border-color: #334155;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base Styles */
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-gray-700 transition-colors duration-200;
+  }
+  
+  html {
+    @apply antialiased scroll-smooth;
+    font-family: var(--font-sans);
+  }
+  
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    @apply text-base leading-relaxed transition-colors duration-300;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+    font-family: var(--font-display);
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+    /* FIXED: Gradient usage */
+    background: linear-gradient(135deg, #14532D 0%, #FACC15 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 { @apply text-3xl md:text-4xl lg:text-5xl text-gray-900 dark:text-gray-100; }
+  h3 { @apply text-2xl md:text-3xl text-gray-800 dark:text-gray-200; }
+  p { @apply text-gray-700 dark:text-gray-300 leading-relaxed; }
+}
+
+/* Custom Component Classes */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-linear-to-r from-brand-green-600 to-brand-green-400 text-white shadow-lg shadow-brand-green-300 hover:shadow-brand-green/40;
+  }
+  
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-lemon focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 transition-all duration-200;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom Utilities */
+@layer utilities {
+  .text-linear {
+    @apply bg-linear-to-r from-brand-lemon to-brand-green bg-clip-text text-transparent;
+  }
+  
+  /* FIXED: Scrollbar gradient and styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #FACC15 0%, #14532D 100%);
+    border-radius: 9999px;
+  }
+
+  .glass {
+    @apply bg-white/10 dark:bg-gray-900/10 backdrop-blur-lg border border-white/20 dark:border-gray-800/20;
+  }
+}
+
+/* Global Selection styling */
+::selection {
+  background-color: #FACC15;
+  color: #14532D;
 }
