@@ -2,39 +2,40 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuoteLeft, faPlus, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faQuoteLeft, faStar } from "@fortawesome/free-solid-svg-icons";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import ReviewForm from "./ReviewForm";
+import AddReviewButton from "./AddReviewButton";
+import Link from "next/link";
+import TestimonialSkeleton from "./TestimonialSkeleton";
 
 interface Testimonial {
   _id: string;
-  avatar?: string;
+  Image: string;
   name: string;
   position?: string;
   company?: string;
   message: string;
-  rating?: number;
+  rating: number;
 }
 
 // Static testimonials as fallback
 const staticTestimonials: Testimonial[] = [
   {
     _id: "static-1",
-    avatar: "/images/Tomiwa.jpg",
+    Image: "/Images/Tomiwa.jpg",
     name: "Tomiwa Oluwadipe",
     position: "CEO",
     company: "Tech Startup",
-    message: "Working with Godwin was an absolute pleasure...",
+    message: "Working with Godwin was an absolute pleasure. His attention to detail and commitment to excellence made our project a success.",
     rating: 5,
   },
   // Add your other static testimonials here
 ];
 
 export default function Testimonial() {
-  const [showForm, setShowForm] = useState(false);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(staticTestimonials);
   const [loading, setLoading] = useState(true);
 
@@ -49,23 +50,28 @@ export default function Testimonial() {
       
       if (data.success && data.data.length > 0) {
         // Combine static testimonials with database testimonials
-        const dbTestimonials = data.data.map((t: {
-          _id: string;
-          image?: string;
-          name: string;
-          position?: string;
-          company?: string;
-          message: string;
-          rating?: number;
-        }) => ({
-          _id: t._id,
-          avatar: t.image || "/images/default-avatar.jpg",
-          name: t.name,
-          position: t.position,
-          company: t.company,
-          message: t.message,
-          rating: t.rating || 5,
-        }));
+        const dbTestimonials = data.data.map(
+					(t: {
+						_id: string;
+						Image: string;
+						name: string;
+						position?: string;
+						company?: string;
+						message: string;
+						rating: number;
+					}) => ({
+						_id: t._id,
+						Image:
+							t.Image ||
+							"https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=FACC15&color=14532D" +
+								t.name,
+						name: t.name,
+						position: t.position,
+						company: t.company,
+						message: t.message,
+						rating: t.rating || 5,
+					}),
+				);
         
         // Mix static and database testimonials
         setTestimonials([...staticTestimonials, ...dbTestimonials]);
@@ -83,91 +89,149 @@ export default function Testimonial() {
   };
 
   return (
-    <section id="testimonial" className="py-16 md:py-24 bg-linear-to-b from-white to-gray-50 relative">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-brand-green mb-6">
-            Testimonials
-          </h2>
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-lemon text-brand-green font-semibold rounded-lg hover:scale-105 transition-all shadow-md cursor-pointer"
-          >
-            <FontAwesomeIcon icon={faPlus} className="text-sm" />
-            Add Your Review
-          </button>
-        </div>
+		<section
+			id="testimonial"
+			className="py-16 md:py-24 relative">
+			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+				{/* Header */}
+				<div className="text-center mb-12 md:mb-16">
+					<h2 className="mb-6">Testimonials</h2>
+					<p className="mx-auto max-w-2xl mb-8">
+						Hear from clients and partners who
+						have experienced our commitment to
+						excellence.
+					</p>
 
-        {/* Modal */}
-        {showForm && (
-          <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative">
-              <ReviewForm 
-                onClose={() => setShowForm(false)} 
-                onSuccess={handleReviewSuccess}
-              />
-            </div>
-          </div>
-        )}
+					{/* Action Buttons */}
+					<div className="flex flex-wrap justify-center gap-4">
+						<AddReviewButton
+							onSuccess={handleReviewSuccess}
+							buttonText="Add Your Review"
+							className="btn-primary"
+						/>
+						<Link
+							href="/testimonials"
+							className="inline-flex items-center gap-2 px-6 py-3 border-2 border-brand-green dark:border-brand-lemon text-brand-green dark:text-brand-lemon font-semibold rounded-xl hover:bg-brand-green dark:hover:bg-brand-lemon hover:text-white dark:hover:text-brand-green transition-all duration-300 active:scale-95">
+							View All Testimonials
+						</Link>
+					</div>
+				</div>
 
-        {/* Testimonials Slider */}
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading testimonials...</p>
-          </div>
-        ) : (
-          <Swiper
-            modules={[Pagination, Autoplay]}
-            spaceBetween={30}
-            slidesPerView={1}
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 5000 }}
-            breakpoints={{ 1024: { slidesPerView: 2 } }}
-            className="pb-12"
-          >
-            {testimonials.map((testimonial) => (
-              <SwiperSlide key={testimonial._id}>
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100 h-full">
-                  <FontAwesomeIcon
-                    icon={faQuoteLeft}
-                    className="text-3xl text-brand-green/20 mb-4"
-                  />
-                  <p className="text-gray-700 text-sm mb-6">{testimonial.message}</p>
-                  <div className="flex gap-1 mb-6">
-                    {[...Array(testimonial.rating || 5)].map((_, i) => (
-                      <FontAwesomeIcon
-                        key={i}
-                        icon={faStar}
-                        className="text-brand-lemon text-sm"
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-4 pt-6 border-t">
-                    {testimonial.avatar && (
-                      <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-200">
-                        <Image
-                          src={testimonial.avatar}
-                          alt={testimonial.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div>
-                      <h5 className="font-bold text-gray-900">{testimonial.name}</h5>
-                      <p className="text-sm text-gray-600">
-                        {testimonial.position}
-                        {testimonial.position && testimonial.company && " at "}
-                        {testimonial.company}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        )}
-      </div>
-    </section>
-  );
+				{/* Testimonials Slider */}
+{loading ? (
+		  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+			<TestimonialSkeleton />
+			<TestimonialSkeleton />
+			<TestimonialSkeleton />
+			<TestimonialSkeleton />
+		  </div>
+		) : testimonials.length === 0 ? (
+		  // Empty State
+		  <div className="text-center py-5">
+			<div className="text-6xl mb-4">💬</div>
+			<h3 className="text-2xl font-bold mb-2">No testimonials yet</h3>
+			<p className="text-gray-600 dark:text-gray-400 mb-6">
+			  Be the first to share your experience!
+			</p>
+			<AddReviewButton 
+			  onSuccess={handleReviewSuccess}
+			  buttonText="Write First Review"
+			  className="btn-primary"
+			/>
+		  </div>
+		) : (
+		  // Testimonials Slider with Add Review Button
+		  <div>
+			<div className="flex justify-center mb-8">
+			  <AddReviewButton 
+				onSuccess={handleReviewSuccess}
+				className="btn-primary"
+			  />
+			</div>
+			
+			<Swiper
+			  modules={[Pagination, Autoplay]}
+			  spaceBetween={30}
+			  slidesPerView={1}
+			  pagination={{
+				clickable: true,
+				bulletClass: "swiper-pagination-bullet",
+				bulletActiveClass: "swiper-pagination-bullet-active",
+			  }}
+			  autoplay={{
+				delay: 5000,
+				disableOnInteraction: false,
+			  }}
+			  breakpoints={{
+				1024: { slidesPerView: 2 },
+			  }}
+			  className="pb-12"
+			>
+			  {testimonials.map((testimonial) => (
+				<SwiperSlide key={testimonial._id}>
+				  <div className="card group cursor-pointer h-85 flex flex-col justify-between">
+					<div>
+					  {/* Quote Icon */}
+					  <FontAwesomeIcon
+						icon={faQuoteLeft}
+						className="text-3xl text-brand-green/20 dark:text-brand-lemon/20 mb-4"
+					  />
+
+					  {/* Message */}
+					  <div className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-sm sm:text-xl">
+						{testimonial.message}
+					  </div>
+
+					  {/* Star Rating */}
+					  <div className="flex gap-1 mb-6">
+						{[...Array(5)].map((_, i) => (
+						  <FontAwesomeIcon
+							key={i}
+							icon={faStar}
+							className={`text-sm ${
+							  i < (testimonial.rating || 5)
+								? "text-brand-lemon"
+								: "text-gray-300 dark:text-gray-600"
+							}`}
+						  />
+						))}
+					  </div>
+					</div>
+
+					{/* Author Info */}
+					<div className="flex items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+					  <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0">
+						<Image
+						  src={
+							testimonial.Image ||
+							`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=FACC15&color=14532D`
+						  }
+						  alt={testimonial.name}
+						  fill
+						  sizes="56px"
+						  className="object-cover"
+						/>
+					  </div>
+					  <div>
+						<h5 className="font-bold text-gray-900 dark:text-gray-100">
+						  {testimonial.name}
+						</h5>
+						{(testimonial.position || testimonial.company) && (
+						  <p className="text-sm text-gray-600 dark:text-gray-400">
+							{testimonial.position}
+							{testimonial.position && testimonial.company && " at "}
+							{testimonial.company}
+						  </p>
+						)}
+					  </div>
+					</div>
+				  </div>
+				</SwiperSlide>
+			  ))}
+			</Swiper>
+		  </div>
+		)}
+	  </div>
+		</section>
+	);
 }

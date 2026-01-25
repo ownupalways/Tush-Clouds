@@ -17,10 +17,10 @@ export default function HomePage() {
 
             {/* Featured Projects */}
             <section className="mb-28">
-                <h2 className="mb-12">
+                <h2 className="mb-7 pl-5">
                     Featured Projects
                 </h2>
-                <div className="grid gap-8 md:grid-cols-2">
+                <div className="grid gap-8 md:grid-cols-2 px-5">
                     <article className="card cursor-pointer hover:scale-[1.02] transition-transform">
                         <h3 className="mb-2">Project One</h3>
                         <p>

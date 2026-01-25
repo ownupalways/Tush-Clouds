@@ -31,6 +31,7 @@ export default function AdminLogin() {
 				router.push("/admin");
 			}
 		} catch (err) {
+			console.error("Login error:", err);
 			setError("An error occurred");
 		} finally {
 			setLoading(false);
@@ -83,13 +84,7 @@ export default function AdminLogin() {
 								setUsername(e.target.value)
 							}
 							required
-							style={{
-								width: "100%",
-								padding: "12px",
-								border: "1px solid #ddd",
-								borderRadius: "5px",
-								fontSize: "14px",
-							}}
+							className="input"
 						/>
 					</div>
 					<div style={{ marginBottom: "20px" }}>
@@ -109,13 +104,7 @@ export default function AdminLogin() {
 								setPassword(e.target.value)
 							}
 							required
-							style={{
-								width: "100%",
-								padding: "12px",
-								border: "1px solid #ddd",
-								borderRadius: "5px",
-								fontSize: "14px",
-							}}
+							className="input"
 						/>
 					</div>
 					{error && (

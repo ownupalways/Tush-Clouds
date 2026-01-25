@@ -56,27 +56,6 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/admin/login");
-    }
-  }, [status, router]);
-
-  // Show loading while checking auth
-  if (status === "loading") {
-    return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  // Don't render anything if not authenticated
-  if (!session) {
-    return null;
-  }
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -100,10 +79,38 @@ export default function AdminDashboard() {
     }
   };
 
+  // ALL HOOKS MUST BE AT THE TOP - Before any returns!
+  
+  // Redirect to login if not authenticated
   useEffect(() => {
-    fetchData();
+    if (status === "unauthenticated") {
+      router.push("/admin/login");
+    }
+  }, [status, router]);
+
+  // Fetch data when tab changes
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, status]);
+
+  // NOW we can do early returns AFTER all hooks
+
+  // Show loading while checking auth
+  if (status === "loading") {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated
+  if (!session) {
+    return null;
+  }
 
   const approveTestimonial = async (id: string, approved: boolean) => {
     try {
