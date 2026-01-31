@@ -142,13 +142,6 @@ export default function Testimonial() {
 		) : (
 		  // Testimonials Slider with Add Review Button
 		  <div>
-			<div className="flex justify-center mb-8">
-			  <AddReviewButton 
-				onSuccess={handleReviewSuccess}
-				className="btn-primary"
-			  />
-			</div>
-			
 			<Swiper
 			  modules={[Pagination, Autoplay]}
 			  spaceBetween={30}

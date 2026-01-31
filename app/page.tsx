@@ -1,4 +1,6 @@
 import Testimonial from "@/components/Testimonial";
+import FeaturedProjects from "@/components/FeaturedProjects";
+
 
 export default function HomePage() {
     return (
@@ -16,28 +18,7 @@ export default function HomePage() {
             </section>
 
             {/* Featured Projects */}
-            <section className="mb-28">
-                <h2 className="mb-7 pl-5">
-                    Featured Projects
-                </h2>
-                <div className="grid gap-8 md:grid-cols-2 px-5">
-                    <article className="card cursor-pointer hover:scale-[1.02] transition-transform">
-                        <h3 className="mb-2">Project One</h3>
-                        <p>
-                            A brief overview of the project, its
-                            purpose, and the problem it solves.
-                        </p>
-                    </article>
-                    <article className="card cursor-pointer hover:scale-[1.02] transition-transform">
-                        <h3 className="mb-2">Project Two</h3>
-                        <p>
-                            A concise description highlighting
-                            functionality and technical
-                            approach.
-                        </p>
-                    </article>
-                </div>
-            </section>
+           <FeaturedProjects />
 
             {/* Testimonials Section */}
             <Testimonial />

@@ -31,7 +31,7 @@ const mainNavLinks: NavItem[] = [
 ];
 
 const activitiesDropdown: DropdownItem[] = [
-	{ label: "Projects", href: "/projects", description: "View our work" },
+	{ label: "Projects", href: "/project", description: "View our work" },
 	{ label: "Testimonials", href: "/testimonials", description: "Client feedback" },
 	{ label: "Experience", href: "/experiences", description: "Our journey" },
 	{ label: "Reviews", href: "/reviews", description: "Customer reviews" },
