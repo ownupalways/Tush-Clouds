@@ -7,7 +7,7 @@ import { faAward, faUsers, faDiagramProject } from "@fortawesome/free-solid-svg-
 
 export default function AboutPage() {
     return (
-			<main className="pt-20 pb-24 max-w-6xl mx-auto px-6">
+			<main className="pt-10 pb-4 max-w-6xl mx-auto px-6">
 				{/* Page Heading */}
 				<section className="flex flex-col md:flex-row items-center gap-12">
 					{/* Image */}

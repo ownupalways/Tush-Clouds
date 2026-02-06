@@ -89,7 +89,7 @@ export default function Testimonial() {
   return (
 		<section
 			id="testimonial"
-			className="pb-16 md:py-24 relative">
+			className="pb-6 md:py-8 relative">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-12 md:mb-16">

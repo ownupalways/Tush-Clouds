@@ -33,7 +33,7 @@ export default function FeaturedProjects() {
   }, [isPaused]);
 
   return (
-    <section className="mb-28 overflow-hidden">
+    <section className="overflow-hidden">
       <div className="mb-7 px-5">
         <h2>Featured Projects</h2>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
