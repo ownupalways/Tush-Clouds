@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,13 +13,16 @@ import {
   faTrash,
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
+// --- Type Definitions ---
 interface Contact {
   _id: string;
   name: string;
   email: string;
   message: string;
-  status: string;
+  status: "new" | "read";
   createdAt: string;
 }
 
@@ -29,7 +32,6 @@ interface Testimonial {
   position?: string;
   company?: string;
   message: string;
-  rating?: number;
   approved: boolean;
   createdAt: string;
 }
@@ -37,467 +39,255 @@ interface Testimonial {
 interface Review {
   _id: string;
   name: string;
-  email?: string;
   rating: number;
   comment: string;
-  category?: string;
   approved: boolean;
   createdAt: string;
+}
+
+type TabType = "contacts" | "testimonials" | "reviews";
+
+interface TabButtonProps {
+  active: boolean;
+  onClick: () => void;
+  icon: IconDefinition;
+  label: string;
+  count: number;
 }
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<
-    "contacts" | "testimonials" | "reviews"
-  >("contacts");
+
+  const [activeTab, setActiveTab] = useState<TabType>("contacts");
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  // FIXED: Wrapped in useCallback to prevent infinite re-renders
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      if (activeTab === "contacts") {
-        const res = await fetch("/api/contact");
-        const data = await res.json();
-        setContacts(data.data || []);
-      } else if (activeTab === "testimonials") {
-        const res = await fetch("/api/testimonials?all=true");
-        const data = await res.json();
-        setTestimonials(data.data || []);
-      } else if (activeTab === "reviews") {
-        const res = await fetch("/api/reviews?all=true");
-        const data = await res.json();
-        setReviews(data.data || []);
-      }
+      const endpoint =
+        activeTab === "contacts"
+          ? "/api/contact"
+          : activeTab === "testimonials"
+          ? "/api/testimonials?all=true"
+          : "/api/reviews?all=true";
+      
+      const res = await fetch(endpoint);
+      const data = await res.json();
+
+      if (activeTab === "contacts") setContacts(data.data || []);
+      else if (activeTab === "testimonials") setTestimonials(data.data || []);
+      else if (activeTab === "reviews") setReviews(data.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
 
-  // ALL HOOKS MUST BE AT THE TOP - Before any returns!
-  
-  // Redirect to login if not authenticated
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/admin/login");
-    }
+    if (status === "unauthenticated") router.push("/admin/login");
   }, [status, router]);
 
-  // Fetch data when tab changes
   useEffect(() => {
     if (status === "authenticated") {
       fetchData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, status]);
+  }, [status, fetchData]);
 
-  // NOW we can do early returns AFTER all hooks
-
-  // Show loading while checking auth
   if (status === "loading") {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <p>Loading...</p>
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-bg-primary">
+        <LoadingSpinner size="xl" />
+        <p className="text-linear font-bold animate-pulse">Initializing...</p>
       </div>
     );
   }
 
-  // Don't render anything if not authenticated
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
-  const approveTestimonial = async (id: string, approved: boolean) => {
+  const handleAction = async (id: string, fn: () => Promise<void>) => {
+    setActionId(id);
     try {
-      await fetch("/api/testimonials", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, approved }),
-      });
-      fetchData();
-    } catch (error) {
-      console.error("Error updating testimonial:", error);
+      await fn();
+    } finally {
+      setActionId(null);
     }
   };
 
-  const approveReview = async (id: string, approved: boolean) => {
-    try {
-      await fetch("/api/reviews", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, approved }),
-      });
-      fetchData();
-    } catch (error) {
-      console.error("Error updating review:", error);
-    }
+  const toggleApproval = async (type: "testimonials" | "reviews", id: string, currentStatus: boolean) => {
+    await fetch(`/api/${type}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, approved: !currentStatus }),
+    });
+    fetchData();
   };
 
-  const deleteItem = async (
-    type: "testimonials" | "reviews",
-    id: string
-  ) => {
-    if (!confirm("Are you sure you want to delete this item?")) return;
-
-    try {
-      await fetch(`/api/${type}?id=${id}`, { method: "DELETE" });
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
+  const deleteItem = async (type: TabType, id: string) => {
+    if (!confirm("Are you sure? This cannot be undone.")) return;
+    await fetch(`/api/${type}?id=${id}`, { method: "DELETE" });
+    fetchData();
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "20px", background: "#f5f5f5" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h1 style={{ fontSize: "2rem", color: "#333", margin: 0 }}>
-            Admin Dashboard
-          </h1>
+    <div className="min-h-screen bg-bg-secondary p-4 md:p-8 transition-colors duration-300">
+      <div className="max-w-6xl mx-auto">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <h1 className="text-linear">Admin Dashboard</h1>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            style={{
-              padding: "10px 20px",
-              background: "#dc3545",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
+            className="group btn-primary bg-red-600 border-red-700 hover:from-red-600 hover:to-red-500"
           >
-            <FontAwesomeIcon icon={faSignOutAlt} /> Logout
+            <FontAwesomeIcon icon={faSignOutAlt} className="group-hover:translate-x-1 transition-transform" />
+            Logout
           </button>
-        </div>
+        </header>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button
+        <nav className="flex flex-wrap gap-2 mb-8 p-1.5 bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl w-fit">
+          <TabButton
+            active={activeTab === "contacts"}
             onClick={() => setActiveTab("contacts")}
-            style={{
-              padding: "10px 20px",
-              background: activeTab === "contacts" ? "#4a90e2" : "#fff",
-              color: activeTab === "contacts" ? "#fff" : "#333",
-              border: "1px solid #ddd",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            <FontAwesomeIcon icon={faEnvelope} /> Contacts ({contacts.length})
-          </button>
-          <button
+            icon={faEnvelope}
+            label="Contacts"
+            count={contacts.length}
+          />
+          <TabButton
+            active={activeTab === "testimonials"}
             onClick={() => setActiveTab("testimonials")}
-            style={{
-              padding: "10px 20px",
-              background: activeTab === "testimonials" ? "#4a90e2" : "#fff",
-              color: activeTab === "testimonials" ? "#fff" : "#333",
-              border: "1px solid #ddd",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            <FontAwesomeIcon icon={faComment} /> Testimonials (
-            {testimonials.length})
-          </button>
-          <button
+            icon={faComment}
+            label="Testimonials"
+            count={testimonials.length}
+          />
+          <TabButton
+            active={activeTab === "reviews"}
             onClick={() => setActiveTab("reviews")}
-            style={{
-              padding: "10px 20px",
-              background: activeTab === "reviews" ? "#4a90e2" : "#fff",
-              color: activeTab === "reviews" ? "#fff" : "#333",
-              border: "1px solid #ddd",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            <FontAwesomeIcon icon={faStar} /> Reviews ({reviews.length})
-          </button>
-        </div>
+            icon={faStar}
+            label="Reviews"
+            count={reviews.length}
+          />
+        </nav>
 
-        {/* Content */}
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <div>
-            {/* Contacts Tab */}
-            {activeTab === "contacts" && (
-              <div>
-                {contacts.length === 0 ? (
-                  <p>No contacts yet.</p>
-                ) : (
-                  contacts.map((contact) => (
-                    <div
-                      key={contact._id}
-                      style={{
-                        background: "#fff",
-                        padding: "20px",
-                        marginBottom: "10px",
-                        borderRadius: "5px",
-                        border: "1px solid #ddd",
-                      }}
+        <div className="relative min-h-[400px]">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center glass rounded-3xl">
+              <LoadingSpinner size="lg" />
+            </div>
+          )}
+
+          <div className={`grid gap-4 transition-opacity duration-300 ${loading ? "opacity-30" : "opacity-100"}`}>
+            {activeTab === "contacts" &&
+              contacts.map((c) => (
+                <div key={c._id} className="card border-l-4 border-l-brand-green">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-brand-green-800 dark:text-brand-green-300">{c.name}</h3>
+                      <p className="text-sm font-mono text-brand-lemon-700 dark:text-brand-lemon-400">{c.email}</p>
+                    </div>
+                    <span
+                      className={`text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-bold ${
+                        c.status === "new" ? "bg-brand-lemon text-brand-green-900" : "bg-brand-green text-white"
+                      }`}
                     >
-                      <h3 style={{ margin: "0 0 10px 0" }}>{contact.name}</h3>
-                      <p style={{ color: "#666", margin: "5px 0" }}>
-                        {contact.email}
+                      {c.status}
+                    </span>
+                  </div>
+                  <p className="mt-4 text-text-primary italic">&#34;{c.message}&#34;</p>
+                  <div className="mt-4 pt-4 border-t border-border-color text-[10px] text-text-tertiary">
+                    Received: {new Date(c.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+
+            {(activeTab === "testimonials" || activeTab === "reviews") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(activeTab === "testimonials" ? testimonials : reviews).map((item) => (
+                  <div key={item._id} className="card flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between gap-2">
+                        <h3 className="text-lg truncate">{item.name}</h3>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            disabled={actionId === item._id}
+                            onClick={() =>
+                              handleAction(item._id, () =>
+                                toggleApproval(activeTab as "testimonials" | "reviews", item._id, item.approved)
+                              )
+                            }
+                            className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
+                              item.approved ? "bg-brand-lemon/20 text-brand-lemon-700" : "bg-brand-green/10 text-brand-green"
+                            }`}
+                          >
+                            {actionId === item._id ? (
+                              <LoadingSpinner size="sm" />
+                            ) : (
+                              <FontAwesomeIcon icon={item.approved ? faTimes : faCheck} />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleAction(item._id, () => deleteItem(activeTab, item._id))}
+                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {"rating" in item && (
+                        <div className="flex text-brand-lemon mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <FontAwesomeIcon
+                              key={i}
+                              icon={faStar}
+                              className={i < item.rating ? "opacity-100" : "opacity-20"}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="mt-3 text-text-secondary text-sm line-clamp-3 italic">
+                        &#34;{"message" in item ? item.message : item.comment}&#34;
                       </p>
-                      <p style={{ margin: "10px 0" }}>{contact.message}</p>
-                      <small style={{ color: "#999" }}>
-                        {new Date(contact.createdAt).toLocaleString()}
-                      </small>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between border-t border-border-color pt-3">
                       <span
-                        style={{
-                          marginLeft: "10px",
-                          padding: "2px 8px",
-                          background:
-                            contact.status === "new" ? "#ffc107" : "#28a745",
-                          color: "#fff",
-                          borderRadius: "3px",
-                          fontSize: "12px",
-                        }}
+                        className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                          item.approved ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                        }`}
                       >
-                        {contact.status}
+                        {item.approved ? "Visible" : "Pending"}
+                      </span>
+                      <span className="text-[10px] text-text-tertiary">
+                        {new Date(item.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Testimonials Tab */}
-            {activeTab === "testimonials" && (
-              <div>
-                {testimonials.length === 0 ? (
-                  <p>No testimonials yet.</p>
-                ) : (
-                  testimonials.map((testimonial) => (
-                    <div
-                      key={testimonial._id}
-                      style={{
-                        background: "#fff",
-                        padding: "20px",
-                        marginBottom: "10px",
-                        borderRadius: "5px",
-                        border: "1px solid #ddd",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "start",
-                        }}
-                      >
-                        <div>
-                          <h3 style={{ margin: "0 0 5px 0" }}>
-                            {testimonial.name}
-                          </h3>
-                          {testimonial.position && (
-                            <p style={{ color: "#666", margin: "0" }}>
-                              {testimonial.position}
-                              {testimonial.company &&
-                                ` at ${testimonial.company}`}
-                            </p>
-                          )}
-                        </div>
-                        <div style={{ display: "flex", gap: "5px" }}>
-                          {!testimonial.approved && (
-                            <button
-                              onClick={() =>
-                                approveTestimonial(testimonial._id, true)
-                              }
-                              style={{
-                                padding: "5px 10px",
-                                background: "#28a745",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "3px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              <FontAwesomeIcon icon={faCheck} /> Approve
-                            </button>
-                          )}
-                          {testimonial.approved && (
-                            <button
-                              onClick={() =>
-                                approveTestimonial(testimonial._id, false)
-                              }
-                              style={{
-                                padding: "5px 10px",
-                                background: "#ffc107",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "3px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              <FontAwesomeIcon icon={faTimes} /> Unapprove
-                            </button>
-                          )}
-                          <button
-                            onClick={() =>
-                              deleteItem("testimonials", testimonial._id)
-                            }
-                            style={{
-                              padding: "5px 10px",
-                              background: "#dc3545",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: "3px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </div>
-                      </div>
-                      <p style={{ margin: "10px 0" }}>{testimonial.message}</p>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <small style={{ color: "#999" }}>
-                          {new Date(testimonial.createdAt).toLocaleString()}
-                        </small>
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            background: testimonial.approved
-                              ? "#28a745"
-                              : "#ffc107",
-                            color: "#fff",
-                            borderRadius: "3px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          {testimonial.approved ? "Approved" : "Pending"}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Reviews Tab */}
-            {activeTab === "reviews" && (
-              <div>
-                {reviews.length === 0 ? (
-                  <p>No reviews yet.</p>
-                ) : (
-                  reviews.map((review) => (
-                    <div
-                      key={review._id}
-                      style={{
-                        background: "#fff",
-                        padding: "20px",
-                        marginBottom: "10px",
-                        borderRadius: "5px",
-                        border: "1px solid #ddd",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "start",
-                        }}
-                      >
-                        <div>
-                          <h3 style={{ margin: "0 0 5px 0" }}>{review.name}</h3>
-                          <div style={{ color: "#ffc107" }}>
-                            {[...Array(review.rating)].map((_, i) => (
-                              <FontAwesomeIcon key={i} icon={faStar} />
-                            ))}
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", gap: "5px" }}>
-                          {!review.approved && (
-                            <button
-                              onClick={() => approveReview(review._id, true)}
-                              style={{
-                                padding: "5px 10px",
-                                background: "#28a745",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "3px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              <FontAwesomeIcon icon={faCheck} /> Approve
-                            </button>
-                          )}
-                          {review.approved && (
-                            <button
-                              onClick={() => approveReview(review._id, false)}
-                              style={{
-                                padding: "5px 10px",
-                                background: "#ffc107",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "3px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              <FontAwesomeIcon icon={faTimes} /> Unapprove
-                            </button>
-                          )}
-                          <button
-                            onClick={() => deleteItem("reviews", review._id)}
-                            style={{
-                              padding: "5px 10px",
-                              background: "#dc3545",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: "3px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </div>
-                      </div>
-                      <p style={{ margin: "10px 0" }}>{review.comment}</p>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <small style={{ color: "#999" }}>
-                          {new Date(review.createdAt).toLocaleString()}
-                        </small>
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            background: review.approved ? "#28a745" : "#ffc107",
-                            color: "#fff",
-                            borderRadius: "3px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          {review.approved ? "Approved" : "Pending"}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 }
+
+// FIXED: Defined TabButtonProps interface and used it to remove 'any'
+const TabButton = ({ active, onClick, icon, label, count }: TabButtonProps) => (
+  <button
+    onClick={onClick}
+    className={`w-full md:w-auto flex items-center justify-center cursor-pointer gap-2 px-6 py-2.5 rounded-xl font-medium transition-all hover:bg-gray-800 ${
+      active
+        ? "bg-white dark:bg-gray-700 text-brand-green-200 shadow-sm ring-1 ring-black/5"
+        : "text-text-secondary hover:text-text-primary"
+    }`}
+  >
+    <FontAwesomeIcon icon={icon} className={active ? "text-brand-lemon" : ""} />
+    {label} <span className="text-xs opacity-60">({count})</span>
+  </button>
+);
