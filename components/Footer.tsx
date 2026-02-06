@@ -9,6 +9,7 @@ import {
 
 const footerLinks = [
     { label: "Home", href: "/" },
+    { label: "Services", href: "/services" },
     { label: "About", href: "/about" },
     { label: "Experience", href: "/experiences" },
     { label: "Testimonials", href: "/testimonials" },
