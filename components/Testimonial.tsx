@@ -11,9 +11,9 @@ import AddReviewButton from "./AddReviewButton";
 import Link from "next/link";
 import TestimonialSkeleton from "./TestimonialSkeleton";
 
-interface Testimonial {
+interface TestimonialApiResponse {
   _id: string;
-  Image: string;
+  image: string;
   name: string;
   position?: string;
   company?: string;
@@ -22,21 +22,26 @@ interface Testimonial {
 }
 
 // Static testimonials as fallback
-const staticTestimonials: Testimonial[] = [
-  {
-    _id: "static-1",
-    Image: "/Images/Tomiwa.jpg",
-    name: "Tomiwa Oluwadipe",
-    position: "CEO",
-    company: "Tech Startup",
-    message: "Working with Godwin was an absolute pleasure. His attention to detail and commitment to excellence made our project a success.",
-    rating: 5,
-  },
-  // Add your other static testimonials here
-];
+const staticTestimonials: TestimonialApiResponse[] =
+	[
+		{
+			_id: "static-1",
+			image: "/Images/Tomiwa.jpg",
+			name: "Tomiwa Oluwadipe",
+			position: "CEO",
+			company: "Tech Startup",
+			message:
+				"Working with Godwin was an absolute pleasure. His attention to detail and commitment to excellence made our project a success.",
+			rating: 5,
+		},
+		// Add your other static testimonials here
+	];
 
 export default function Testimonial() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(staticTestimonials);
+  const [testimonials, setTestimonials] =
+		useState<TestimonialApiResponse[]>(
+			staticTestimonials,
+		);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,20 +56,13 @@ export default function Testimonial() {
       if (data.success && data.data.length > 0) {
         // Combine static testimonials with database testimonials
         const dbTestimonials = data.data.map(
-					(t: {
-						_id: string;
-						Image: string;
-						name: string;
-						position?: string;
-						company?: string;
-						message: string;
-						rating: number;
-					}) => ({
+					(t: TestimonialApiResponse) => ({
 						_id: t._id,
-						Image:
-							t.Image ||
-							"https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=FACC15&color=14532D" +
+						image:
+							t.image ||
+							`https://ui-avatars.com/api/?name=${encodeURIComponent(
 								t.name,
+							)}&background=FACC15&color=14532D`,
 						name: t.name,
 						position: t.position,
 						company: t.company,
@@ -91,7 +89,7 @@ export default function Testimonial() {
   return (
 		<section
 			id="testimonial"
-			className="py-16 md:py-24 relative">
+			className="pb-16 md:py-24 relative">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-12 md:mb-16">
@@ -105,9 +103,8 @@ export default function Testimonial() {
 					{/* Action Buttons */}
 					<div className="flex flex-wrap justify-center gap-4">
 						<AddReviewButton
+							type="testimonial"
 							onSuccess={handleReviewSuccess}
-							buttonText="Add Your Review"
-							className="btn-primary"
 						/>
 						<Link
 							href="/testimonials"
@@ -118,113 +115,126 @@ export default function Testimonial() {
 				</div>
 
 				{/* Testimonials Slider */}
-{loading ? (
-		  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-			<TestimonialSkeleton />
-			<TestimonialSkeleton />
-			<TestimonialSkeleton />
-			<TestimonialSkeleton />
-		  </div>
-		) : testimonials.length === 0 ? (
-		  // Empty State
-		  <div className="text-center py-5">
-			<div className="text-6xl mb-4">💬</div>
-			<h3 className="text-2xl font-bold mb-2">No testimonials yet</h3>
-			<p className="text-gray-600 dark:text-gray-400 mb-6">
-			  Be the first to share your experience!
-			</p>
-			<AddReviewButton 
-			  onSuccess={handleReviewSuccess}
-			  buttonText="Write First Review"
-			  className="btn-primary"
-			/>
-		  </div>
-		) : (
-		  // Testimonials Slider with Add Review Button
-		  <div>
-			<Swiper
-			  modules={[Pagination, Autoplay]}
-			  spaceBetween={30}
-			  slidesPerView={1}
-			  pagination={{
-				clickable: true,
-				bulletClass: "swiper-pagination-bullet",
-				bulletActiveClass: "swiper-pagination-bullet-active",
-			  }}
-			  autoplay={{
-				delay: 5000,
-				disableOnInteraction: false,
-			  }}
-			  breakpoints={{
-				1024: { slidesPerView: 2 },
-			  }}
-			  className="pb-12"
-			>
-			  {testimonials.map((testimonial) => (
-				<SwiperSlide key={testimonial._id}>
-				  <div className="card group cursor-pointer h-85 flex flex-col justify-between">
-					<div>
-					  {/* Quote Icon */}
-					  <FontAwesomeIcon
-						icon={faQuoteLeft}
-						className="text-3xl text-brand-green/20 dark:text-brand-lemon/20 mb-4"
-					  />
-
-					  {/* Message */}
-					  <div className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-sm sm:text-xl">
-						{testimonial.message}
-					  </div>
-
-					  {/* Star Rating */}
-					  <div className="flex gap-1 mb-6">
-						{[...Array(5)].map((_, i) => (
-						  <FontAwesomeIcon
-							key={i}
-							icon={faStar}
-							className={`text-sm ${
-							  i < (testimonial.rating || 5)
-								? "text-brand-lemon"
-								: "text-gray-300 dark:text-gray-600"
-							}`}
-						  />
-						))}
-					  </div>
+				{loading ? (
+					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+						<TestimonialSkeleton />
+						<TestimonialSkeleton />
+						<TestimonialSkeleton />
+						<TestimonialSkeleton />
 					</div>
-
-					{/* Author Info */}
-					<div className="flex items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-					  <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0">
-						<Image
-						  src={
-							testimonial.Image ||
-							`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=FACC15&color=14532D`
-						  }
-						  alt={testimonial.name}
-						  fill
-						  sizes="56px"
-						  className="object-cover"
+				) : testimonials.length === 0 ? (
+					// Empty State
+					<div className="text-center py-5">
+						<div className="text-6xl mb-4">
+							💬
+						</div>
+						<h3 className="text-2xl font-bold mb-2">
+							No testimonials yet
+						</h3>
+						<p className="text-gray-600 dark:text-gray-400 mb-6">
+							Be the first to share your
+							experience!
+						</p>
+						<AddReviewButton
+							type="testimonial"
+							onSuccess={handleReviewSuccess}
 						/>
-					  </div>
-					  <div>
-						<h5 className="font-bold text-gray-900 dark:text-gray-100">
-						  {testimonial.name}
-						</h5>
-						{(testimonial.position || testimonial.company) && (
-						  <p className="text-sm text-gray-600 dark:text-gray-400">
-							{testimonial.position}
-							{testimonial.position && testimonial.company && " at "}
-							{testimonial.company}
-						  </p>
-						)}
-					  </div>
 					</div>
-				  </div>
-				</SwiperSlide>
-			  ))}
-			</Swiper>
-		  </div>
-		)}
-	  </div>
+				) : (
+					// Testimonials Slider with Add Review Button
+					<div>
+						<Swiper
+							modules={[Pagination, Autoplay]}
+							spaceBetween={30}
+							slidesPerView={1}
+							pagination={{
+								clickable: true,
+								bulletClass:
+									"swiper-pagination-bullet",
+								bulletActiveClass:
+									"swiper-pagination-bullet-active",
+							}}
+							autoplay={{
+								delay: 5000,
+								disableOnInteraction: false,
+							}}
+							breakpoints={{
+								1024: { slidesPerView: 2 },
+							}}
+							className="pb-12">
+							{testimonials.map((testimonial) => (
+								<SwiperSlide
+									key={testimonial._id}>
+									<div className="card group cursor-pointer h-85 flex flex-col justify-between">
+										<div>
+											{/* Quote Icon */}
+											<FontAwesomeIcon
+												icon={faQuoteLeft}
+												className="text-3xl text-brand-green/20 dark:text-brand-lemon/20 mb-4"
+											/>
+
+											{/* Message */}
+											<div className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-sm sm:text-xl">
+												{testimonial.message}
+											</div>
+
+											{/* Star Rating */}
+											<div className="flex gap-1 mb-6">
+												{[...Array(5)].map(
+													(_, i) => (
+														<FontAwesomeIcon
+															key={i}
+															icon={faStar}
+															className={`text-sm ${
+																i <
+																(testimonial.rating ||
+																	5)
+																	? "text-brand-lemon"
+																	: "text-gray-300 dark:text-gray-600"
+															}`}
+														/>
+													),
+												)}
+											</div>
+										</div>
+
+										{/* Author Info */}
+										<div className="flex items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+											<div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0">
+												<Image
+													src={
+														testimonial.image ||
+														`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=FACC15&color=14532D`
+													}
+													alt={testimonial.name}
+													fill
+													sizes="56px"
+													className="object-cover"
+												/>
+											</div>
+											<div>
+												<h5 className="font-bold text-gray-900 dark:text-gray-100">
+													{testimonial.name}
+												</h5>
+												{(testimonial.position ||
+													testimonial.company) && (
+													<p className="text-sm text-gray-600 dark:text-gray-400">
+														{testimonial.position}
+														{testimonial.position &&
+															testimonial.company &&
+															" at "}
+														{testimonial.company}
+													</p>
+												)}
+											</div>
+										</div>
+									</div>
+								</SwiperSlide>
+							))}
+						</Swiper>
+					</div>
+				)}
+			</div>
 		</section>
 	);
 }

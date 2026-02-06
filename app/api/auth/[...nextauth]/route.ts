@@ -6,8 +6,8 @@ const handler = NextAuth({
 		CredentialsProvider({
 			name: "Credentials",
 			credentials: {
-				username: {
-					label: "Username",
+				email: {
+					label: "Email",
 					type: "text",
 				},
 				password: {
@@ -19,7 +19,7 @@ const handler = NextAuth({
 				// Debug logging (remove after fixing)
 				console.log("🔐 Login attempt:");
 				console.log(
-					"Expected username:",
+					"Expected email:",
 					process.env.ADMIN_USERNAME,
 				);
 				console.log(
@@ -27,8 +27,8 @@ const handler = NextAuth({
 					!!process.env.ADMIN_PASSWORD,
 				);
 				console.log(
-					"Received username:",
-					credentials?.username,
+					"Received email:",
+					credentials?.email,
 				);
 				console.log(
 					"Received password exists:",
@@ -37,7 +37,7 @@ const handler = NextAuth({
 
 				// Check credentials against environment variables
 				if (
-					credentials?.username ===
+					credentials?.email ===
 						process.env.ADMIN_USERNAME &&
 					credentials?.password ===
 						process.env.ADMIN_PASSWORD

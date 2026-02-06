@@ -5,41 +5,32 @@ import { projects } from "@/data/projects";
 
 export default function FeaturedProjects() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const setRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer || isPaused) return;
+    const container = scrollRef.current;
+    const set = setRef.current;
+    if (!container || !set || isPaused) return;
 
     let animationId: number;
-    let scrollPosition = scrollContainer.scrollLeft;
+    let scrollPosition = container.scrollLeft;
+    const setWidth = set.offsetWidth;
 
     const scroll = () => {
-      if (scrollContainer) {
-        scrollPosition += 0.5; // Adjust speed here
-        
-        // Get the width of one set of projects
-        const singleSetWidth = scrollContainer.scrollWidth / 3;
-        
-        // If we've scrolled past one full set, reset position seamlessly
-        if (scrollPosition >= singleSetWidth) {
-          scrollPosition = 0;
-          scrollContainer.scrollLeft = 0;
-        } else {
-          scrollContainer.scrollLeft = scrollPosition;
-        }
-
-        animationId = requestAnimationFrame(scroll);
+      scrollPosition += 0.5;
+      if (scrollPosition >= setWidth) {
+        scrollPosition = 0;
+        container.scrollLeft = 0;
+      } else {
+        container.scrollLeft = scrollPosition;
       }
+      animationId = requestAnimationFrame(scroll);
     };
 
     animationId = requestAnimationFrame(scroll);
-
     return () => cancelAnimationFrame(animationId);
   }, [isPaused]);
-
-  // Triple the projects for seamless infinite scroll
-  const duplicatedProjects = [...projects, ...projects, ...projects];
 
   return (
     <section className="mb-28 overflow-hidden">
@@ -50,18 +41,46 @@ export default function FeaturedProjects() {
         </p>
       </div>
 
+      {/* Cards Scroll */}
       <div
         ref={scrollRef}
-        className="flex gap-8 px-5 overflow-x-hidden hover:overflow-x-auto scrollbar-hide"
-        style={{ scrollBehavior: "auto" }}
+        className="flex gap-8 px-5 overflow-hidden max-sm:flex-wrap max-sm:justify-center"
       >
-        {duplicatedProjects.map((project, index) => (
-          <ProjectCard
-            key={`${project.id}-${index}`}
-            project={project}
-            onHover={setIsPaused}
-          />
-        ))}
+        <div
+          ref={setRef}
+          className="flex gap-8 shrink-0 min-w-max justify-center"
+        >
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              className="w-[280px] sm:w-[320px] lg:w-[360px] shrink-0"
+            >
+              <ProjectCard project={project} onHover={setIsPaused} />
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-8 shrink-0 min-w-max">
+          {projects.map((project) => (
+            <div
+              key={`${project.id}-clone`}
+              className="w-[280px] sm:w-[320px] lg:w-[360px] shrink-0"
+            >
+              <ProjectCard project={project} onHover={setIsPaused} />
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-8 shrink-0">
+          {projects.map((project) => (
+            <div
+              key={`${project.id}-clone2`}
+              className="w-[280px] sm:w-[320px] lg:w-[360px] shrink-0"
+            >
+              <ProjectCard project={project} onHover={setIsPaused} />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Custom Scrollbar Hide CSS */}

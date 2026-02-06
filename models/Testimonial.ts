@@ -4,6 +4,10 @@ import mongoose, {
 	Model,
 } from "mongoose";
 
+/**
+ * Testimonials = curated, marketing-focused feedback
+ * Used on homepage, landing pages
+ */
 export interface ITestimonial {
 	name: string;
 	position?: string;
@@ -11,6 +15,11 @@ export interface ITestimonial {
 	message: string;
 	rating?: number;
 	image?: string;
+
+	// ✅ NEW (optional)
+	// Controls homepage visibility
+	featured?: boolean;
+
 	approved: boolean;
 	createdAt: Date;
 }
@@ -46,6 +55,13 @@ const TestimonialSchema =
 				type: String,
 				trim: true,
 			},
+
+			// 🔹 NEW FIELD
+			featured: {
+				type: Boolean,
+				default: false,
+			},
+
 			approved: {
 				type: Boolean,
 				default: false,

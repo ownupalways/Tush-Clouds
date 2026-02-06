@@ -33,11 +33,11 @@ const getLevelColor = (level: string) => {
 
 export default function Experience() {
     return (
-        <section id="experience" className="py-16 md:py-24 bg-white">
+        <section id="experience" className="py-16 md:py-24 bg-body">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 {/* Section Heading */}
                 <div className="text-center mb-12 md:mb-16">
-                    <h5 className="text-base md:text-lg text-gray-600 mb-2 font-medium">
+                    <h5 className="text-lg text-white tracking-wider mb-2">
                         What Skills I Have
                     </h5>
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-brand-green">
@@ -48,7 +48,7 @@ export default function Experience() {
                 {/* Skills Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
                     {/* Frontend Development */}
-                    <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-lg hover:border-brand-green/20 transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="card border-2 border-gray-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-lg hover:border-brand-green/20 transition-all duration-300 transform hover:-translate-y-1">
                         <h3 className="text-xl md:text-2xl font-bold text-center text-brand-green mb-6 md:mb-8">
                             Frontend Development
                         </h3>
@@ -133,6 +133,3 @@ export default function Experience() {
         </section>
     );
 }
-
-
-

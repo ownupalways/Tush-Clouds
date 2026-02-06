@@ -2,73 +2,13 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Testimonial from "@/models/Testimonial";
 
-// POST - Create a new testimonial
-export async function POST(request: Request) {
-	try {
-		const body = await request.json();
-		const {
-			name,
-			position,
-			company,
-			message,
-			rating,
-			image,
-		} = body;
-
-		// Validate required fields
-		if (!name || !message) {
-			return NextResponse.json(
-				{
-					error: "Name and message are required",
-				},
-				{ status: 400 },
-			);
-		}
-
-		// Validate rating if provided
-		if (rating && (rating < 1 || rating > 5)) {
-			return NextResponse.json(
-				{
-					error: "Rating must be between 1 and 5",
-				},
-				{ status: 400 },
-			);
-		}
-
-		await connectDB();
-
-		const testimonial = await Testimonial.create({
-			name,
-			position,
-			company,
-			message,
-			rating: rating || 5,
-			image,
-			approved: false, // Requires admin approval
-		});
-
-		return NextResponse.json(
-			{
-				success: true,
-				message:
-					"Testimonial submitted successfully. Pending approval.",
-				data: testimonial,
-			},
-			{ status: 201 },
-		);
-	} catch (error) {
-		console.error(
-			"Error creating testimonial:",
-			error,
-		);
-		return NextResponse.json(
-			{ error: "Failed to submit testimonial" },
-			{ status: 500 },
-		);
-	}
-}
-
-// GET - Retrieve testimonials
+interface TestimonialFilter {
+    approved?: boolean;
+    featured?: boolean;
+}   
+/**
+ * GET – Retrieve testimonials
+ */
 export async function GET(request: Request) {
 	try {
 		await connectDB();
@@ -76,22 +16,23 @@ export async function GET(request: Request) {
 		const { searchParams } = new URL(request.url);
 		const showAll =
 			searchParams.get("all") === "true";
+		const featured =
+			searchParams.get("featured") === "true"; // ✅ NEW
 
-		// If showAll=true, return all testimonials (for admin)
-		// Otherwise, only return approved testimonials (for public)
-		interface FilterType {
-			approved?: boolean;
-		}
-
-		const filter: FilterType = showAll
+		const filter: TestimonialFilter = showAll
 			? {}
 			: { approved: true };
 
+		// 🔹 Homepage curation
+		if (featured) {
+			filter.featured = true;
+		}
+
 		const testimonials = await Testimonial.find(
 			filter,
-		).sort({
-			createdAt: -1,
-		});
+		)
+			.sort({ createdAt: -1 })
+			.limit(featured ? 6 : 20); // ✅ NEW
 
 		return NextResponse.json(
 			{
@@ -113,96 +54,138 @@ export async function GET(request: Request) {
 	}
 }
 
-// PATCH - Update testimonial (approve/reject)
-export async function PATCH(request: Request) {
-	try {
-		const body = await request.json();
-		const { id, approved } = body;
+/**
+ * POST – Create testimonial
+ */
+export async function POST(request: Request) {
+    try {
+        const body = await request.json();
+        const { name, position, company, message } = body;
 
-		if (!id) {
-			return NextResponse.json(
-				{ error: "Testimonial ID is required" },
-				{ status: 400 },
-			);
-		}
+        if (!name || !message) {
+            return NextResponse.json(
+                { error: "Name and message are required" },
+                { status: 400 }
+            );
+        }
 
-		await connectDB();
+        await connectDB();
 
-		const testimonial =
-			await Testimonial.findByIdAndUpdate(
-				id,
-				{ approved },
-				{ new: true },
-			);
+        const testimonial = await Testimonial.create({
+            name,
+            position,
+            company,
+            message,
+            approved: false,
+            featured: false,
+        });
 
-		if (!testimonial) {
-			return NextResponse.json(
-				{ error: "Testimonial not found" },
-				{ status: 404 },
-			);
-		}
-
-		return NextResponse.json(
-			{
-				success: true,
-				message: `Testimonial ${approved ? "approved" : "rejected"}`,
-				data: testimonial,
-			},
-			{ status: 200 },
-		);
-	} catch (error) {
-		console.error(
-			"Error updating testimonial:",
-			error,
-		);
-		return NextResponse.json(
-			{ error: "Failed to update testimonial" },
-			{ status: 500 },
-		);
-	}
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Testimonial submitted successfully. Pending approval.",
+                data: testimonial,
+            },
+            { status: 201 }
+        );
+    } catch (error) {
+        console.error("Error creating testimonial:", error);
+        return NextResponse.json(
+            { error: "Failed to submit testimonial" },
+            { status: 500 }
+        );
+    }
 }
 
-// DELETE - Delete a testimonial
+/**
+ * PATCH – Update testimonial approval status
+ */
+export async function PATCH(request: Request) {
+    try {
+        const body = await request.json();
+        const { id, approved, featured } = body;
+
+        if (!id) {
+            return NextResponse.json(
+                { error: "Testimonial ID is required" },
+                { status: 400 }
+            );
+        }
+
+        await connectDB();
+
+        const updateData: { approved?: boolean; featured?: boolean } = {};
+        if (typeof approved === "boolean") updateData.approved = approved;
+        if (typeof featured === "boolean") updateData.featured = featured;
+
+        const testimonial = await Testimonial.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        );
+
+        if (!testimonial) {
+            return NextResponse.json(
+                { error: "Testimonial not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Testimonial updated successfully",
+                data: testimonial,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error updating testimonial:", error);
+        return NextResponse.json(
+            { error: "Failed to update testimonial" },
+            { status: 500 }
+        );
+    }
+}
+
+/**
+ * DELETE – Remove a testimonial
+ */
 export async function DELETE(request: Request) {
-	try {
-		const { searchParams } = new URL(request.url);
-		const id = searchParams.get("id");
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get("id");
 
-		if (!id) {
-			return NextResponse.json(
-				{ error: "Testimonial ID is required" },
-				{ status: 400 },
-			);
-		}
+        if (!id) {
+            return NextResponse.json(
+                { error: "Testimonial ID is required" },
+                { status: 400 }
+            );
+        }
 
-		await connectDB();
+        await connectDB();
 
-		const testimonial =
-			await Testimonial.findByIdAndDelete(id);
+        const testimonial = await Testimonial.findByIdAndDelete(id);
 
-		if (!testimonial) {
-			return NextResponse.json(
-				{ error: "Testimonial not found" },
-				{ status: 404 },
-			);
-		}
+        if (!testimonial) {
+            return NextResponse.json(
+                { error: "Testimonial not found" },
+                { status: 404 }
+            );
+        }
 
-		return NextResponse.json(
-			{
-				success: true,
-				message:
-					"Testimonial deleted successfully",
-			},
-			{ status: 200 },
-		);
-	} catch (error) {
-		console.error(
-			"Error deleting testimonial:",
-			error,
-		);
-		return NextResponse.json(
-			{ error: "Failed to delete testimonial" },
-			{ status: 500 },
-		);
-	}
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Testimonial deleted successfully",
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error deleting testimonial:", error);
+        return NextResponse.json(
+            { error: "Failed to delete testimonial" },
+            { status: 500 }
+        );
+    }
 }

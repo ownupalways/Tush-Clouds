@@ -1,16 +1,16 @@
 import Testimonial from "@/components/Testimonial";
 import FeaturedProjects from "@/components/FeaturedProjects";
-import Hero from "@/components/Hero";
+
+
 export default function HomePage() {
     return (
         <>
             {/* Hero */}
-            <Hero />
             <section className="mb-28 text-center">
                 <h1>Hi, I&apos;m Godwin</h1>
                 <p className="mx-auto mt-6 max-w-2xl">
                     I design and build clean, professional
-                    web experiences using ExpressJs,React.js, Next.js and
+                    web experiences using Next.js and
                     TypeScript — focused on clarity,
                     performance, and long-term
                     maintainability.
@@ -24,7 +24,7 @@ export default function HomePage() {
             <Testimonial />
 
             {/* About Preview */}
-            {/* <section className="mb-28 max-w-3xl mx-auto">
+            <section className="mb-28 max-w-3xl mx-auto">
                 <h2 className="mb-6">About Me</h2>
                 <p>
                     I am a web developer with a strong focus
@@ -34,7 +34,7 @@ export default function HomePage() {
                     layouts, and user-centered design over
                     unnecessary effects.
                 </p>
-            </section> */}
+            </section>
 
             {/* Contact CTA */}
             <section className="text-center mb-28">

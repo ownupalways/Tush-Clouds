@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
+import AddReviewButton from "@/components/AddReviewButton";
+import TestimonialSkeleton from "@/components/TestimonialSkeleton";
 
 interface Review {
   _id: string;
@@ -35,120 +37,150 @@ export default function ReviewsPage() {
     }
   };
 
+  const handleReviewSuccess = () => {
+    fetchReviews();
+  };
+
   const renderStars = (rating: number, filled: boolean = true) => {
     return [...Array(5)].map((_, i) => (
       <FontAwesomeIcon
         key={i}
         icon={faStar}
-        style={{
-          color: i < rating ? (filled ? "#ffc107" : "#ddd") : "#ddd",
-          marginRight: "3px",
-        }}
+        className={`${
+          i < rating 
+            ? filled 
+              ? "text-brand-lemon-400" 
+              : "text-gray-300 dark:text-gray-600"
+            : "text-gray-300 dark:text-gray-600"
+        } mr-1 transition-colors duration-200`}
       />
     ));
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "40px 20px", background: "#f9f9f9" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: "60px" }}>
-          <h1 style={{ fontSize: "3rem", color: "#333", marginBottom: "10px" }}>
+    <div className="min-h-screen py-16 md:py-24 bg-bg-primary transition-colors duration-300">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="mb-4">
             Customer Reviews
           </h1>
-          <p style={{ fontSize: "1.2rem", color: "#666", marginBottom: "20px" }}>
+          <p className="text-xl md:text-2xl text-text-secondary mb-8">
             See what our customers think about our work
           </p>
-          
+
           {!loading && reviews.length > 0 && (
-            <div
-              style={{
-                display: "inline-block",
-                background: "#fff",
-                padding: "20px 40px",
-                borderRadius: "10px",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-              }}
-            >
-              <div style={{ fontSize: "3rem", fontWeight: "bold", color: "#4a90e2", marginBottom: "10px" }}>
-                {averageRating}
+            <div className="inline-block card p-8 md:p-10 hover:scale-105 transition-transform duration-300 mb-5">
+              <div className="text-6xl font-bold text-linear mb-3">
+                {averageRating.toFixed(1)}
               </div>
-              <div style={{ marginBottom: "10px" }}>
+              <div className="mb-3 flex justify-center">
                 {renderStars(Math.round(averageRating))}
               </div>
-              <p style={{ margin: 0, color: "#666" }}>
-                Based on {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+              <p className="text-text-secondary mb-6">
+                Based on {reviews.length}{" "}
+                {reviews.length === 1 ? "review" : "reviews"}
               </p>
+              <AddReviewButton
+                type="review"
+                onSuccess={handleReviewSuccess}
+                buttonText="Add Your Review"
+              />
             </div>
           )}
         </div>
 
+        {/* Reviews List */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <p style={{ fontSize: "1.2rem", color: "#666" }}>Loading reviews...</p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <TestimonialSkeleton />
+            <TestimonialSkeleton />
+            <TestimonialSkeleton />
+            <TestimonialSkeleton />
           </div>
         ) : reviews.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <p style={{ fontSize: "1.2rem", color: "#666" }}>No reviews yet. Be the first to leave a review!</p>
+          <div className="text-center py-20">
+            <div className="card max-w-md mx-auto p-10">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br from-brand-lemon-200 to-brand-green-200 dark:from-brand-lemon-900 dark:to-brand-green-900 flex items-center justify-center">
+                <FontAwesomeIcon 
+                  icon={faStar} 
+                  className="text-3xl text-brand-lemon-600 dark:text-brand-lemon-400" 
+                />
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-text-primary">
+                No reviews yet
+              </h3>
+              <p className="text-lg text-text-secondary mb-6">
+                Be the first to share your experience!
+              </p>
+              <AddReviewButton
+                type="review"
+                onSuccess={handleReviewSuccess}
+                buttonText="Write First Review"
+              />
+            </div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            {reviews.map((review) => (
+          <div className="space-y-6">
+            {reviews.map((review, index) => (
               <div
                 key={review._id}
+                className="card border-l-4 border-l-brand-lemon hover:border-l-brand-green transition-all duration-300 hover:-translate-y-1"
                 style={{
-                  background: "#fff",
-                  padding: "25px",
-                  borderRadius: "10px",
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-                  borderLeft: "4px solid #4a90e2",
+                  animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                    marginBottom: "15px",
-                  }}
-                >
-                  <div>
-                    <h3 style={{ margin: "0 0 8px 0", color: "#333", fontSize: "1.2rem" }}>
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-text-primary mb-2">
                       {review.name}
                     </h3>
-                    <div>{renderStars(review.rating)}</div>
+                    <div className="flex items-center">
+                      {renderStars(review.rating)}
+                    </div>
                   </div>
+                  
                   {review.category && (
-                    <span
-                      style={{
-                        padding: "5px 12px",
-                        background: "#e3f2fd",
-                        color: "#1976d2",
-                        borderRadius: "20px",
-                        fontSize: "0.85rem",
-                        textTransform: "capitalize",
-                      }}
-                    >
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-linear-to-r from-brand-lemon-100 to-brand-green-100 dark:from-brand-lemon-900/30 dark:to-brand-green-900/30 text-brand-green-700 dark:text-brand-green-300 capitalize border border-brand-green-200 dark:border-brand-green-800">
                       {review.category}
                     </span>
                   )}
                 </div>
-                
-                <p style={{ margin: 0, color: "#555", lineHeight: "1.8", fontSize: "1rem" }}>
-                  {review.comment}
+
+                <p className="text-text-secondary leading-relaxed text-base md:text-lg mb-4 italic">
+                  &ldquo;{review.comment}&rdquo;
                 </p>
-                
-                <small style={{ display: "block", marginTop: "15px", color: "#999" }}>
-                  {new Date(review.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </small>
+
+                <div className="flex items-center justify-between pt-4 border-t border-border-color">
+                  <time className="text-sm text-text-tertiary">
+                    {new Date(review.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </time>
+                  <div className="flex gap-1">
+                    {renderStars(review.rating, false)}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

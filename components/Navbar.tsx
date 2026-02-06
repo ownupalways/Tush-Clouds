@@ -147,17 +147,18 @@ export default function Navbar() {
 				scrolled || isMenuOpen
 					? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-sm border-b border-gray-200 dark:border-gray-800 py-3"
 					: "bg-transparent py-5"
-			}`}
-		>
+			}`}>
 			<nav className="mx-auto max-w-7xl px-6 lg:px-12">
 				<div className="flex items-center justify-between">
 					{/* Logo */}
-					<Link href="/" className="flex items-center gap-2 group">
-						<div className="relative w-10 h-10 bg-linear-to-br from-brand-lemon to-brand-green rounded-xl flex items-center justify-center text-white font-bold text-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-brand-lemon/30">
+					<Link
+						href="/"
+						className="flex items-center gap-2 group z-100 text:sm">
+						<div className="relative w-10 h-10 bg-linear-to-br from-brand-lemon to-brand-green rounded-xl flex items-center justify-center text-white font-bold md:text-lg text-sm transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-brand-lemon/30">
 							G
 							<div className="absolute inset-0 bg-linear-to-tr from-white/20 to-transparent rounded-xl" />
 						</div>
-						<span className="text-xl lg:text-2xl font-bold tracking-tight bg-linear-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+						<span className="md:text-lg text-sm font-bold tracking-tight bg-linear-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
 							TUSH
 							<span className="bg-linear-to-r from-brand-lemon to-brand-green bg-clip-text text-transparent">
 								-CLOUDS
@@ -177,20 +178,27 @@ export default function Navbar() {
 						))}
 
 						{/* Activities Dropdown */}
-						<div className="relative" ref={dropdownRef}>
+						<div
+							className="relative"
+							ref={dropdownRef}>
 							<button
-								onClick={() => setDropdownOpen(!dropdownOpen)}
+								onClick={() =>
+									setDropdownOpen(!dropdownOpen)
+								}
 								className={`group relative px-5 py-2.5 text-sm lg:text-base font-semibold transition-all duration-300 rounded-xl flex items-center gap-2 ${
 									isActivitiesActive
 										? "text-white"
 										: "text-gray-700 dark:text-gray-300 hover:text-brand-green dark:hover:text-brand-lemon"
-								}`}
-							>
-								<span className="relative z-10">Activities</span>
+								}`}>
+								<span className="relative z-10">
+									Activities
+								</span>
 								<FontAwesomeIcon
 									icon={faChevronDown}
 									className={`relative z-10 text-xs transition-transform duration-300 ${
-										dropdownOpen ? "rotate-180" : ""
+										dropdownOpen
+											? "rotate-180"
+											: ""
 									}`}
 								/>
 
@@ -206,27 +214,30 @@ export default function Navbar() {
 							{/* Dropdown Menu */}
 							{dropdownOpen && (
 								<div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-									{activitiesDropdown.map((item) => (
-										<Link
-											key={item.href}
-											href={item.href}
-											onClick={() => setDropdownOpen(false)}
-											className={`block px-6 py-4 transition-all duration-200 ${
-												pathname === item.href
-													? "bg-linear-to-r from-brand-lemon to-brand-green text-white"
-													: "hover:bg-gray-50 dark:hover:bg-gray-700"
-											}`}
-										>
-											<div className="font-semibold text-sm mb-1">
-												{item.label}
-											</div>
-											{item.description && (
-												<div className="text-xs text-gray-600 dark:text-gray-400">
-													{item.description}
+									{activitiesDropdown.map(
+										(item) => (
+											<Link
+												key={item.href}
+												href={item.href}
+												onClick={() =>
+													setDropdownOpen(false)
+												}
+												className={`block px-6 py-4 transition-all duration-200 ${
+													pathname === item.href
+														? "bg-linear-to-r from-brand-lemon to-brand-green text-white"
+														: "hover:bg-gray-50 dark:hover:bg-gray-700"
+												}`}>
+												<div className="font-semibold text-sm mb-1">
+													{item.label}
 												</div>
-											)}
-										</Link>
-									))}
+												{item.description && (
+													<div className="text-xs text-gray-600 dark:text-gray-400">
+														{item.description}
+													</div>
+												)}
+											</Link>
+										),
+									)}
 								</div>
 							)}
 						</div>
@@ -238,11 +249,14 @@ export default function Navbar() {
 						<button
 							onClick={toggleTheme}
 							className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 active:scale-95 group"
-							aria-label="Toggle dark mode"
-						>
+							aria-label="Toggle dark mode">
 							{mounted ? (
 								<FontAwesomeIcon
-									icon={theme === "dark" ? faSun : faMoon}
+									icon={
+										theme === "dark"
+											? faSun
+											: faMoon
+									}
 									className="text-lg transition-transform duration-300 group-hover:rotate-12"
 								/>
 							) : (
@@ -252,12 +266,15 @@ export default function Navbar() {
 
 						{/* Mobile Toggle Button */}
 						<button
-							onClick={() => setIsMenuOpen(!isMenuOpen)}
-							className="md:hidden relative z-50 w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 active:scale-95"
-							aria-label="Toggle menu"
-						>
+							onClick={() =>
+								setIsMenuOpen(!isMenuOpen)
+							}
+							className="md:hidden relative z-100 w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 active:scale-95"
+							aria-label="Toggle menu">
 							<FontAwesomeIcon
-								icon={isMenuOpen ? faXmark : faBars}
+								icon={
+									isMenuOpen ? faXmark : faBars
+								}
 								className="text-xl"
 							/>
 						</button>
@@ -271,8 +288,7 @@ export default function Navbar() {
 					isMenuOpen
 						? "opacity-100 visible"
 						: "opacity-0 invisible pointer-events-none"
-				}`}
-			>
+				}`}>
 				<div className="flex flex-col h-full pt-24 px-6 pb-12">
 					<div className="flex-1 space-y-2">
 						<div className="flex items-center justify-between mb-8">
@@ -289,14 +305,19 @@ export default function Navbar() {
 											? "translate-y-0 opacity-100"
 											: "translate-y-8 opacity-0"
 									}`}
-									style={{ transitionDelay: `${i * 80}ms` }}
-								>
+									style={{
+										transitionDelay: `${i * 80}ms`,
+									}}>
 									<NavLink
 										mobile
 										href={link.href}
 										label={link.label}
-										isActive={pathname === link.href}
-										onClick={() => setIsMenuOpen(false)}
+										isActive={
+											pathname === link.href
+										}
+										onClick={() =>
+											setIsMenuOpen(false)
+										}
 									/>
 								</li>
 							))}
@@ -308,21 +329,29 @@ export default function Navbar() {
 										? "translate-y-0 opacity-100"
 										: "translate-y-8 opacity-0"
 								}`}
-								style={{ transitionDelay: `${mainNavLinks.length * 80}ms` }}
-							>
+								style={{
+									transitionDelay: `${mainNavLinks.length * 80}ms`,
+								}}>
 								<button
-									onClick={() => setMobileActivitiesOpen(!mobileActivitiesOpen)}
+									onClick={() =>
+										setMobileActivitiesOpen(
+											!mobileActivitiesOpen,
+										)
+									}
 									className={`w-full group relative flex items-center justify-between px-6 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 overflow-hidden ${
 										isActivitiesActive
 											? "bg-linear-to-r from-brand-lemon to-brand-green text-white shadow-lg"
 											: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-									}`}
-								>
-									<span className="relative z-10">Activities</span>
+									}`}>
+									<span className="relative z-10">
+										Activities
+									</span>
 									<FontAwesomeIcon
 										icon={faChevronDown}
 										className={`relative z-10 text-sm transition-transform duration-300 ${
-											mobileActivitiesOpen ? "rotate-180" : ""
+											mobileActivitiesOpen
+												? "rotate-180"
+												: ""
 										}`}
 									/>
 									{!isActivitiesActive && (
@@ -333,25 +362,30 @@ export default function Navbar() {
 								{/* Mobile Dropdown Items */}
 								{mobileActivitiesOpen && (
 									<div className="mt-2 ml-4 space-y-2">
-										{activitiesDropdown.map((item) => (
-											<Link
-												key={item.href}
-												href={item.href}
-												onClick={() => setIsMenuOpen(false)}
-												className={`block px-6 py-3 rounded-xl transition-all duration-200 ${
-													pathname === item.href
-														? "bg-linear-to-r from-brand-lemon to-brand-green text-white"
-														: "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-												}`}
-											>
-												<div className="font-semibold text-sm">{item.label}</div>
-												{item.description && (
-													<div className="text-xs opacity-80 mt-1">
-														{item.description}
+										{activitiesDropdown.map(
+											(item) => (
+												<Link
+													key={item.href}
+													href={item.href}
+													onClick={() =>
+														setIsMenuOpen(false)
+													}
+													className={`block px-6 py-3 rounded-xl transition-all duration-200 ${
+														pathname === item.href
+															? "bg-linear-to-r from-brand-lemon to-brand-green text-white"
+															: "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+													}`}>
+													<div className="font-semibold text-sm">
+														{item.label}
 													</div>
-												)}
-											</Link>
-										))}
+													{item.description && (
+														<div className="text-xs opacity-80 mt-1">
+															{item.description}
+														</div>
+													)}
+												</Link>
+											),
+										)}
 									</div>
 								)}
 							</li>
@@ -364,17 +398,17 @@ export default function Navbar() {
 							isMenuOpen
 								? "opacity-100 translate-y-0"
 								: "opacity-0 translate-y-4"
-						}`}
-					>
+						}`}>
 						<p className="text-gray-600 dark:text-gray-400 px-2 text-sm font-medium">
 							Ready to start your project?
 						</p>
 						<Link
 							href="/contact"
 							onClick={() => setIsMenuOpen(false)}
-							className="group relative flex items-center justify-center gap-3 w-full py-4 bg-linear-to-r from-brand-lemon to-brand-green text-white font-bold rounded-2xl shadow-xl shadow-brand-lemon/30 hover:shadow-2xl hover:shadow-brand-green/40 transition-all duration-300 overflow-hidden"
-						>
-							<span className="relative z-10">Let&apos;s Talk</span>
+							className="group relative flex items-center justify-center gap-3 w-full py-4 bg-linear-to-r from-brand-lemon to-brand-green text-white font-bold rounded-2xl shadow-xl shadow-brand-lemon/30 hover:shadow-2xl hover:shadow-brand-green/40 transition-all duration-300 overflow-hidden">
+							<span className="relative z-10">
+								Let&apos;s Talk
+							</span>
 							<FontAwesomeIcon
 								icon={faArrowRight}
 								className="relative z-10 transition-transform duration-300 group-hover:translate-x-1"

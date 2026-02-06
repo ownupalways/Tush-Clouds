@@ -4,12 +4,22 @@ import mongoose, {
 	Model,
 } from "mongoose";
 
+/**
+ * Reviews = transactional / service-based feedback
+ * Can grow large and be filtered/paginated
+ */
 export interface IReview {
 	name: string;
 	email?: string;
 	rating: number;
 	comment: string;
 	category?: string;
+
+	// ✅ NEW (optional, non-breaking)
+	// Allows reviews to be tied to a specific item later
+	targetType?: "service" | "course" | "portfolio";
+	targetId?: string;
+
 	approved: boolean;
 	createdAt: Date;
 }
@@ -47,6 +57,16 @@ const ReviewSchema = new Schema<IReview>(
 			],
 			default: "other",
 		},
+
+		// 🔹 NEW FIELDS (optional – existing data unaffected)
+		targetType: {
+			type: String,
+			enum: ["service", "course", "portfolio"],
+		},
+		targetId: {
+			type: String,
+		},
+
 		approved: {
 			type: Boolean,
 			default: false,

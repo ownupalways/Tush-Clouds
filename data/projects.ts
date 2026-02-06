@@ -9,17 +9,34 @@ export const projects: Project[] = [
 			"A full-stack e-commerce solution with payment integration, inventory management, and real-time analytics.",
 		image: "/projects/ecommerce.jpg",
 		tags: [
-			"Next.js",
-			"TypeScript",
+			"React.js",
+			"JavaScript",
 			"Stripe",
 			"MongoDB",
 		],
 		demoUrl: "https://demo.example.com",
 		githubUrl:
-			"https://github.com/example/ecommerce",
-		liveUrl:
-			"https://landingpage-psi-nine-74.vercel.app/",
+			"https://github.com/ownupalways/AIG_Fashion",
+		liveUrl: "https://aiefashionz.com",
 		category: "Web Application",
+		featured: true,
+	},
+	{
+		id: "admin-dashboard",
+		title: "Admin Dashboard",
+		description:
+			"Comprehensive admin dashboard with analytics, user management, and system monitoring capabilities with proper customer order update and management.",
+		image:
+			"/projects/ecommAdmin.bmp",
+		tags: [
+			"React",
+			"Node.js",
+			"Socket.io",
+			"PostgreSQL",
+		],
+		demoUrl: "https://demo.example.com/tasks",
+		liveUrl: "https://tasks.example.com",
+		category: "Productivity",
 		featured: true,
 	},
 	{
@@ -28,7 +45,7 @@ export const projects: Project[] = [
 		description:
 			"A modern, conversion-optimized and responsive landing page featuring  advanced theming, reusable components and production-ready code with smooth animations.",
 		image:
-			"https://placehold.co/800x600/14532d/facc15?text=Custom+Landing+Page",
+			"/projects/landingpage.bmp",
 		tags: [
 			"Next.js",
 			"TypeScript",
@@ -37,7 +54,7 @@ export const projects: Project[] = [
 		],
 		demoUrl: "https://demo.example.com/chatbot",
 		githubUrl:
-			"https://github.com/example/chatbot",
+			"https://github.com/ownupalways/landingPage",
 		liveUrl:
 			"https://landingpage-psi-nine-74.vercel.app/",
 		category: "Web Application",

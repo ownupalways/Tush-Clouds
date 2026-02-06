@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLogin() {
-	const [username, setUsername] = useState("");
+	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function AdminLogin() {
 
 		try {
 			const result = await signIn("credentials", {
-				username,
+				email,
 				password,
 				redirect: false,
 			});
@@ -42,27 +42,26 @@ export default function AdminLogin() {
 		<div
 			style={{
 				display: "flex",
-				justifyContent: "center",
+                justifyContent: "center",
+                padding:"0 8px",
 				alignItems: "center",
 				minHeight: "100vh",
-				background:
-					"linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
 			}}>
 			<div
 				style={{
-					background: "#fff",
-					padding: "40px",
+					background: "linear-gradient(135deg, #14532D 0%, #FACC15 100%)",
 					borderRadius: "10px",
 					boxShadow:
 						"0 10px 40px rgba(0,0,0,0.2)",
 					width: "100%",
-					maxWidth: "400px",
+                    maxWidth: "400px",
+                    padding: "30px",
 				}}>
 				<h2
 					style={{
 						textAlign: "center",
 						marginBottom: "30px",
-						color: "#333",
+						color: "white",
 					}}>
 					Admin Login
 				</h2>
@@ -72,16 +71,16 @@ export default function AdminLogin() {
 							style={{
 								display: "block",
 								marginBottom: "5px",
-								color: "#666",
+								color: "#fff",
 								fontWeight: "500",
 							}}>
 							Username
 						</label>
 						<input
 							type="text"
-							value={username}
+							value={email}
 							onChange={(e) =>
-								setUsername(e.target.value)
+								setEmail(e.target.value)
 							}
 							required
 							className="input"
@@ -92,7 +91,7 @@ export default function AdminLogin() {
 							style={{
 								display: "block",
 								marginBottom: "5px",
-								color: "#666",
+								color: "#fff",
 								fontWeight: "500",
 							}}>
 							Password
@@ -128,7 +127,7 @@ export default function AdminLogin() {
 							padding: "12px",
 							background: loading
 								? "#999"
-								: "#667eea",
+								: "#0a0a0a",
 							color: "#fff",
 							border: "none",
 							borderRadius: "5px",
