@@ -2,8 +2,13 @@
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAward, faUsers, faDiagramProject } from "@fortawesome/free-solid-svg-icons";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
 
+export const metadata: Metadata = {
+    title: "About | TUSH-CLOUDS",
+    description: "Learn about Godwin and the TUSH-CLOUDS mission to deliver exceptional digital solutions.",
+};
 
 export default function AboutPage() {
     return (

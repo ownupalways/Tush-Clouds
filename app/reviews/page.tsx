@@ -25,17 +25,46 @@ export default function ReviewsPage() {
   }, []);
 
   const fetchReviews = async () => {
-    try {
-      const res = await fetch("/api/reviews");
-      const data = await res.json();
-      setReviews(data.data || []);
-      setAverageRating(data.averageRating || 0);
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+		try {
+			const res = await fetch("/api/reviews");
+
+			// Check if response is ok
+			if (!res.ok) {
+				console.error(
+					"API Error:",
+					res.status,
+					res.statusText,
+				);
+				return;
+			}
+
+			// Check if response is JSON
+			const contentType = res.headers.get(
+				"content-type",
+			);
+			if (
+				!contentType ||
+				!contentType.includes("application/json")
+			) {
+				console.error(
+					"Response is not JSON:",
+					await res.text(),
+				);
+				return;
+			}
+
+			const data = await res.json();
+			setReviews(data.data || []);
+			setAverageRating(data.averageRating || 0);
+		} catch (error) {
+			console.error(
+				"Error fetching reviews:",
+				error,
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
 
   const handleReviewSuccess = () => {
     fetchReviews();
