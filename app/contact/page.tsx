@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, FormEvent, useState } from "react";
+import React, { useRef, ChangeEvent, useState } from "react";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookMessenger, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -29,7 +29,7 @@ const Contact: React.FC = () => {
     }));
   };
 
-  const sendEmail = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const sendEmail = async (e: ChangeEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     if (!form.current) return;

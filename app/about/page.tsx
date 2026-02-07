@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import AboutClient from "./AboutClient"; // ✅ NEW
+import AboutClient from "@/components/AboutClient"; // ✅ NEW
 
 // ✅ metadata now valid
 export const metadata: Metadata = {
