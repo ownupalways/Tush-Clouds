@@ -6,7 +6,7 @@ import {
 } from "react";
 import ProjectCard from "./ProjectCard";
 import { projects } from "@/data/projects";
-import ProjectCardSkeleton from "./ProjectCardSkeleton"; // optional skeleton for loading
+import ProjectCardSkeleton from "./ProjectCardSkeleton";
 
 export default function FeaturedProjects() {
 	const scrollRef = useRef<HTMLDivElement>(null);
@@ -19,12 +19,13 @@ export default function FeaturedProjects() {
 		const timer = setTimeout(
 			() => setLoading(false),
 			800,
-		); // simulate fetch delay
+		);
 		return () => clearTimeout(timer);
 	}, []);
 
+	// Infinite scroll animation
 	useEffect(() => {
-		if (loading) return; // do not scroll while loading
+		if (loading) return;
 
 		const container = scrollRef.current;
 		const set = setRef.current;
@@ -47,7 +48,6 @@ export default function FeaturedProjects() {
 			cancelAnimationFrame(animationId);
 	}, [isPaused, loading]);
 
-	// Handle hover to pause scrolling
 	const handleHover = (hovered: boolean) =>
 		setIsPaused(hovered);
 
@@ -77,7 +77,7 @@ export default function FeaturedProjects() {
 				) : (
 					<div
 						ref={scrollRef}
-						className="flex gap-4 sm:gap-6 px-2 sm:px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+						className="flex gap-4 sm:gap-6 px-2 sm:px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory max-sm:flex-wrap max-sm:justify-center">
 						{/* Original Set */}
 						<div
 							ref={setRef}
@@ -91,8 +91,8 @@ export default function FeaturedProjects() {
 							))}
 						</div>
 
-						{/* Clone for infinite scroll */}
-						<div className="flex gap-4 sm:gap-6 shrink-0 min-w-max">
+						{/* Clone for infinite scroll (desktop only) */}
+						<div className="hidden sm:flex gap-4 sm:gap-6 shrink-0 min-w-max">
 							{projects.map((project) => (
 								<ProjectCard
 									key={`${project.id}-clone`}
@@ -105,7 +105,7 @@ export default function FeaturedProjects() {
 				)}
 			</div>
 
-			{/* Custom Scrollbar Hide */}
+			{/* Custom scrollbar hide */}
 			<style jsx>{`
 				.scrollbar-hide::-webkit-scrollbar {
 					display: none;

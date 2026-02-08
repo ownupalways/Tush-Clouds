@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -29,13 +30,13 @@ export default function ProjectCard({
 	return (
 		<Link
 			href={`/projects/${project.id}`}
-			className="w-full md:w-auto">
+			className="w-full sm:w-[280px] md:w-[320px] lg:w-[360px] flex-shrink-0">
 			<article
-				className="card cursor-pointer group relative overflow-hidden flex flex-col h-full min-h-[480px] md:min-h-[500px] lg:min-h-[520px] transition-shadow duration-300 hover:shadow-xl rounded-xl"
+				className="card cursor-pointer group relative overflow-hidden flex flex-col h-full min-h-[420px] sm:min-h-[450px] md:min-h-[480px] lg:min-h-[500px] transition-shadow duration-300 hover:shadow-xl rounded-xl"
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}>
-				{/* Image Section */}
-				<div className="relative h-48 md:h-56 lg:h-60 mb-4 rounded-t-xl overflow-hidden bg-gray-200 dark:bg-gray-700">
+				{/* Image */}
+				<div className="relative h-40 sm:h-48 md:h-52 lg:h-56 mb-3 rounded-t-xl overflow-hidden bg-gray-200 dark:bg-gray-700">
 					<Image
 						src={project.image}
 						alt={project.title}
@@ -44,14 +45,12 @@ export default function ProjectCard({
 							isDevelopment || isExternalImage
 						}
 						className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 350px"
+						sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
 					/>
-
-					{/* Overlay */}
 					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-					{/* Quick Action Buttons */}
-					<div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+					{/* Quick Buttons */}
+					<div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
 						{project.demoUrl && (
 							<button
 								onClick={(e) => {
@@ -88,28 +87,25 @@ export default function ProjectCard({
 						)}
 					</div>
 
-					{/* Category Badge */}
-					<div className="absolute top-4 left-4">
+					{/* Category */}
+					<div className="absolute top-3 left-3">
 						<span className="text-[10px] sm:text-xs md:text-sm bg-brand-green/90 dark:bg-brand-lemon/90 text-white dark:text-brand-green px-2 sm:px-3 py-1 rounded-full font-medium">
 							{project.category}
 						</span>
 					</div>
 				</div>
 
-				{/* Content Section */}
-				<div className="flex flex-col flex-1 px-3 sm:px-4 pb-4">
-					{/* Title */}
-					<h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-2 line-clamp-2 group-hover:text-brand-lemon transition-colors">
+				{/* Content */}
+				<div className="flex flex-col flex-1 px-3 sm:px-4 pb-3">
+					<h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-1 line-clamp-2 group-hover:text-brand-lemon transition-colors">
 						{project.title}
 					</h3>
-
-					{/* Description */}
-					<p className="text-xs sm:text-sm md:text-base lg:text-base text-gray-600 dark:text-gray-400 mb-3 flex-1 line-clamp-3">
+					<p className="text-[10px] sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mb-2 line-clamp-3 flex-1">
 						{project.description}
 					</p>
 
 					{/* Tags */}
-					<div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
+					<div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
 						{project.tags
 							.slice(0, 3)
 							.map((tag) => (
