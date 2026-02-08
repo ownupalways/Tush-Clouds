@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,6 +10,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function AboutPage() {
+  useEffect(() => {
+    document.title = "About | TUSH-CLOUDS";
+  }, []);
+
   return (
     <main className="pt-10 pb-4 max-w-6xl mx-auto px-6">
       <section className="flex flex-col md:flex-row items-center gap-12">
@@ -40,9 +45,7 @@ export default function AboutPage() {
                 className="text-3xl text-brand-green mb-2"
               />
               <h5 className="font-semibold text-black">Experience</h5>
-              <small className="text-black/70">
-                2+ Years Working Experience
-              </small>
+              <small className="text-black/70">2+ Years Working Experience</small>
             </div>
             <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-4">
               <FontAwesomeIcon
@@ -71,9 +74,7 @@ export default function AboutPage() {
             <p>
               I am Godwin, a web developer specializing in Next.js and TypeScript.
             </p>
-            <p>
-              My workflow emphasizes simplicity and readability.
-            </p>
+            <p>My workflow emphasizes simplicity and readability.</p>
             <p>
               When I&apos;m not coding, I enjoy learning about design systems.
             </p>
