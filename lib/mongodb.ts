@@ -1,58 +1,59 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
 	throw new Error(
-		"Please define the MONGODB_URI environment variable",
+		"❌ Please define the MONGODB_URI environment variable",
 	);
 }
 
+/**
+ * Global cache (VERY important for Next.js / Vercel serverless)
+ */
 interface MongooseCache {
 	conn: typeof mongoose | null;
 	promise: Promise<typeof mongoose> | null;
 }
 
 declare global {
-	var mongoose: MongooseCache | undefined;
+	/** eslint-disable-next-line no-var */
+	var mongooseCache: MongooseCache | undefined;
 }
 
-const cached: MongooseCache = global.mongoose || {
-	conn: null,
-	promise: null,
-};
-
-if (!global.mongoose) {
-	global.mongoose = cached;
+// ✅ Initialize cache safely
+if (!global.mongooseCache) {
+	global.mongooseCache = {
+		conn: null,
+		promise: null,
+	};
 }
 
-async function connectDB() {
-    if (cached.conn) return cached.conn;
-    
-    if (!cached.promise) {
-        cached.promise = mongoose.connect(
-            MONGODB_URI,
-            {
-                bufferCommands: false,
-                maxPoolSize: 10,
-                // Add these TLS options
-                tls: true,
-                tlsAllowInvalidCertificates: true, // For testing only
-                serverSelectionTimeoutMS: 5000,
-                socketTimeoutMS: 45000,
-            },
-        );
-    }
-    
-    try {
-        cached.conn = await cached.promise;
-        console.log("✅ MongoDB connected");
-        return cached.conn;
-    } catch (error) {
-        cached.promise = null; // Reset on error
-        console.error("❌ MongoDB connection error:", error);
-        throw error;
-    }
+const cached = global.mongooseCache;
+
+async function connectDB(): Promise<
+	typeof mongoose
+> {
+	// ✅ If already connected, return immediately
+	if (cached.conn) {
+		return cached.conn;
+	}
+
+	// ✅ Create connection promise once
+	if (!cached.promise) {
+		cached.promise = mongoose.connect(
+			MONGODB_URI!,
+			{
+				bufferCommands: false, // critical for serverless speed
+			},
+		);
+	}
+
+	cached.conn = await cached.promise;
+
+	console.log("✅ MongoDB connected");
+
+	return cached.conn;
 }
 
 export default connectDB;

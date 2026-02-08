@@ -1,6 +1,18 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+/**
+ * 🚀 IMPORTANT
+ * This route MUST be dynamic to avoid cold-start compile delays
+ */
+export const dynamic = "force-dynamic";
+
+/**
+ * (Optional but recommended)
+ * Forces Node.js runtime for credentials auth
+ */
+export const runtime = "nodejs";
+
 const handler = NextAuth({
 	providers: [
 		CredentialsProvider({
@@ -16,33 +28,20 @@ const handler = NextAuth({
 				},
 			},
 			async authorize(credentials) {
-				// Debug logging (remove after fixing)
-				console.log("🔐 Login attempt:");
-				console.log(
-					"Expected email:",
-					process.env.ADMIN_USERNAME,
-				);
-				console.log(
-					"Expected password exists:",
-					!!process.env.ADMIN_PASSWORD,
-				);
-				console.log(
-					"Received email:",
-					credentials?.email,
-				);
-				console.log(
-					"Received password exists:",
-					!!credentials?.password,
-				);
-
-				// Check credentials against environment variables
+				// ❌ Never log secrets in production
 				if (
-					credentials?.email ===
+					!credentials?.email ||
+					!credentials?.password
+				) {
+					return null;
+				}
+
+				if (
+					credentials.email ===
 						process.env.ADMIN_USERNAME &&
-					credentials?.password ===
+					credentials.password ===
 						process.env.ADMIN_PASSWORD
 				) {
-					console.log("✅ Login successful!");
 					return {
 						id: "1",
 						name: "Admin",
@@ -50,16 +49,15 @@ const handler = NextAuth({
 					};
 				}
 
-				console.log(
-					"❌ Login failed - credentials don't match",
-				);
 				return null;
 			},
 		}),
 	],
+
 	pages: {
 		signIn: "/admin/login",
 	},
+
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
@@ -67,14 +65,16 @@ const handler = NextAuth({
 			}
 			return token;
 		},
+
 		async session({ session, token }) {
-			if (session.user) {
+			if (session.user && token?.id) {
 				(session.user as { id: string }).id =
 					token.id as string;
 			}
 			return session;
 		},
 	},
+
 	secret: process.env.NEXTAUTH_SECRET,
 });
 

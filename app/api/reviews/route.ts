@@ -2,18 +2,38 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Review from "@/models/Review";
 
-
 interface ReviewFilter {
-    approved?: boolean;
-    category?: string;
-    targetType?: "service" | "course" | "portfolio";
-    targetId?: string;
+	approved?: boolean;
+	category?: string;
+	targetType?: "service" | "course" | "portfolio";
+	targetId?: string;
 }
+
+/**
+ * 🚀 PERFORMANCE FLAGS
+ */
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 /**
  * POST – Create review
  */
 export async function POST(request: Request) {
 	try {
+		const contentType = request.headers.get(
+			"content-type",
+		);
+
+		if (
+			!contentType ||
+			!contentType.includes("application/json")
+		) {
+			return NextResponse.json(
+				{ error: "Invalid request format" },
+				{ status: 400 },
+			);
+		}
+
 		const body = await request.json();
 		const {
 			name,
@@ -21,11 +41,15 @@ export async function POST(request: Request) {
 			rating,
 			comment,
 			category,
-			targetType, // ✅ NEW
-			targetId, // ✅ NEW
-		} = body;
+			targetType,
+			targetId,
+		} = body ?? {};
 
-		if (!name || !rating || !comment) {
+		if (
+			!name ||
+			!comment ||
+			typeof rating !== "number"
+		) {
 			return NextResponse.json(
 				{
 					error:
@@ -47,16 +71,16 @@ export async function POST(request: Request) {
 		await connectDB();
 
 		const review = await Review.create({
-			name,
-			email,
+			name: name.trim(),
+			email:
+				typeof email === "string"
+					? email.trim().toLowerCase()
+					: undefined,
 			rating,
-			comment,
+			comment: comment.trim(),
 			category: category || "other",
-
-			// 🔹 Optional – doesn’t break old clients
 			targetType,
 			targetId,
-
 			approved: false,
 		});
 
@@ -74,6 +98,7 @@ export async function POST(request: Request) {
 			"Error creating review:",
 			error,
 		);
+
 		return NextResponse.json(
 			{ error: "Failed to submit review" },
 			{ status: 500 },
@@ -86,14 +111,11 @@ export async function POST(request: Request) {
  */
 export async function GET(request: Request) {
 	try {
-		await connectDB();
-
 		const { searchParams } = new URL(request.url);
 		const showAll =
 			searchParams.get("all") === "true";
 		const category = searchParams.get("category");
 
-		// ✅ NEW – pagination (defaults keep old behavior)
 		const page =
 			Number(searchParams.get("page")) || 0;
 		const limit = 20;
@@ -101,33 +123,40 @@ export async function GET(request: Request) {
 		const filter: ReviewFilter = showAll
 			? {}
 			: { approved: true };
+
 		if (category) filter.category = category;
 
-		const reviews = await Review.find(filter)
-			.sort({ createdAt: -1 })
-			.skip(page * limit)
-			.limit(limit);
+		await connectDB();
 
-		// ✅ FIX – average rating only from approved reviews
-		const approvedReviews = reviews.filter(
-			(r) => r.approved,
-		);
+		const [reviews, stats] = await Promise.all([
+			Review.find(filter)
+				.sort({ createdAt: -1 })
+				.skip(page * limit)
+				.limit(limit)
+				.lean(),
+			Review.aggregate([
+				{ $match: { approved: true } },
+				{
+					$group: {
+						_id: null,
+						avgRating: {
+							$avg: "$rating",
+						},
+					},
+				},
+			]),
+		]);
 
 		const avgRating =
-			approvedReviews.length > 0
-				? approvedReviews.reduce(
-						(sum, r) => sum + r.rating,
-						0,
-					) / approvedReviews.length
+			stats.length > 0
+				? Number(stats[0].avgRating.toFixed(1))
 				: 0;
 
 		return NextResponse.json(
 			{
 				success: true,
 				count: reviews.length,
-				averageRating: Number(
-					avgRating.toFixed(1),
-				),
+				averageRating: avgRating,
 				data: reviews,
 			},
 			{ status: 200 },
@@ -137,6 +166,7 @@ export async function GET(request: Request) {
 			"Error fetching reviews:",
 			error,
 		);
+
 		return NextResponse.json(
 			{ error: "Failed to fetch reviews" },
 			{ status: 500 },
@@ -145,97 +175,125 @@ export async function GET(request: Request) {
 }
 
 /**
- * PATCH – Update review approval status
+ * PATCH – Update review approval
  */
 export async function PATCH(request: Request) {
-    try {
-        const body = await request.json();
-        const { id, approved } = body;
+	try {
+		const contentType = request.headers.get(
+			"content-type",
+		);
 
-        if (!id) {
-            return NextResponse.json(
-                { error: "Review ID is required" },
-                { status: 400 }
-            );
-        }
+		if (
+			!contentType ||
+			!contentType.includes("application/json")
+		) {
+			return NextResponse.json(
+				{ error: "Invalid request format" },
+				{ status: 400 },
+			);
+		}
 
-        if (typeof approved !== "boolean") {
-            return NextResponse.json(
-                { error: "Approved status must be a boolean" },
-                { status: 400 }
-            );
-        }
+		const body = await request.json();
+		const { id, approved } = body ?? {};
 
-        await connectDB();
+		if (!id || typeof id !== "string") {
+			return NextResponse.json(
+				{ error: "Review ID is required" },
+				{ status: 400 },
+			);
+		}
 
-        const review = await Review.findByIdAndUpdate(
-            id,
-            { approved },
-            { new: true }
-        );
+		if (typeof approved !== "boolean") {
+			return NextResponse.json(
+				{
+					error:
+						"Approved status must be a boolean",
+				},
+				{ status: 400 },
+			);
+		}
 
-        if (!review) {
-            return NextResponse.json(
-                { error: "Review not found" },
-                { status: 404 }
-            );
-        }
+		await connectDB();
 
-        return NextResponse.json(
-            {
-                success: true,
-                message: `Review ${approved ? "approved" : "unapproved"} successfully`,
-                data: review,
-            },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error("Error updating review:", error);
-        return NextResponse.json(
-            { error: "Failed to update review" },
-            { status: 500 }
-        );
-    }
+		const review = await Review.findByIdAndUpdate(
+			id,
+			{ approved },
+			{ new: true },
+		);
+
+		if (!review) {
+			return NextResponse.json(
+				{ error: "Review not found" },
+				{ status: 404 },
+			);
+		}
+
+		return NextResponse.json(
+			{
+				success: true,
+				message: `Review ${
+					approved ? "approved" : "unapproved"
+				} successfully`,
+				data: review,
+			},
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error(
+			"Error updating review:",
+			error,
+		);
+
+		return NextResponse.json(
+			{ error: "Failed to update review" },
+			{ status: 500 },
+		);
+	}
 }
 
 /**
- * DELETE – Remove a review
+ * DELETE – Remove review
  */
 export async function DELETE(request: Request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const id = searchParams.get("id");
+	try {
+		const { searchParams } = new URL(request.url);
+		const id = searchParams.get("id");
 
-        if (!id) {
-            return NextResponse.json(
-                { error: "Review ID is required" },
-                { status: 400 }
-            );
-        }
+		if (!id) {
+			return NextResponse.json(
+				{ error: "Review ID is required" },
+				{ status: 400 },
+			);
+		}
 
-        await connectDB();
+		await connectDB();
 
-        const review = await Review.findByIdAndDelete(id);
+		const review =
+			await Review.findByIdAndDelete(id);
 
-        if (!review) {
-            return NextResponse.json(
-                { error: "Review not found" },
-                { status: 404 }
-            );
-        }
+		if (!review) {
+			return NextResponse.json(
+				{ error: "Review not found" },
+				{ status: 404 },
+			);
+		}
 
-        return NextResponse.json(
-            {
-                success: true,
-                message: "Review deleted successfully",
-            },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error("Error deleting review:", error);
-        return NextResponse.json(
-            { error: "Failed to delete review" },
-            { status: 500 }
-        );
-    }
+		return NextResponse.json(
+			{
+				success: true,
+				message: "Review deleted successfully",
+			},
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error(
+			"Error deleting review:",
+			error,
+		);
+
+		return NextResponse.json(
+			{ error: "Failed to delete review" },
+			{ status: 500 },
+		);
+	}
 }
