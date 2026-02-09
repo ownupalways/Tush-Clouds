@@ -19,24 +19,35 @@ export default function ProjectCard({
 	project,
 	onHover,
 }: ProjectCardProps) {
-	const handleMouseEnter = () => onHover?.(true);
-	const handleMouseLeave = () => onHover?.(false);
-
 	const isDevelopment =
 		process.env.NODE_ENV === "development";
 	const isExternalImage =
 		project.image.startsWith("http");
 
+	const openExternal = (url: string) => {
+		window.open(
+			url,
+			"_blank",
+			"noopener,noreferrer",
+		);
+	};
+
 	return (
 		<Link
 			href={`/projects/${project.id}`}
-			className="w-full sm:w-[280px] md:w-[320px] lg:w-[360px] flex-shrink-0">
+			className="block w-[280px] sm:w-[320px] shrink-0 snap-start"
+			onMouseEnter={() => onHover?.(true)}
+			onMouseLeave={() => onHover?.(false)}>
 			<article
-				className="card cursor-pointer group relative overflow-hidden flex flex-col h-full min-h-[420px] sm:min-h-[450px] md:min-h-[480px] lg:min-h-[500px] transition-shadow duration-300 hover:shadow-xl rounded-xl"
-				onMouseEnter={handleMouseEnter}
-				onMouseLeave={handleMouseLeave}>
+				className="
+          group flex h-full flex-col overflow-hidden
+          rounded-xl bg-white dark:bg-gray-900
+          shadow-md transition-all
+          hover:-translate-y-1 hover:shadow-xl
+          motion-reduce:transform-none
+        ">
 				{/* Image */}
-				<div className="relative h-40 sm:h-48 md:h-52 lg:h-56 mb-3 rounded-t-xl overflow-hidden bg-gray-200 dark:bg-gray-700">
+				<div className="relative aspect-video overflow-hidden">
 					<Image
 						src={project.image}
 						alt={project.title}
@@ -44,92 +55,89 @@ export default function ProjectCard({
 						unoptimized={
 							isDevelopment || isExternalImage
 						}
-						className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-						sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+						sizes="(min-width:1024px) 320px, 100vw"
+						className="object-cover transition-transform duration-300 group-hover:scale-105"
 					/>
-					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-					{/* Quick Buttons */}
-					<div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-						{project.demoUrl && (
-							<button
-								onClick={(e) => {
-									e.preventDefault();
-									window.open(
-										project.demoUrl,
-										"_blank",
-									);
-								}}
-								className="bg-brand-lemon text-brand-green p-2 rounded-full hover:bg-brand-lemon/90 transition-colors"
-								title="View Demo">
-								<FontAwesomeIcon
-									icon={faPlay}
-									className="w-4 h-4"
-								/>
-							</button>
-						)}
+					{/* Overlay */}
+					<div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
 						{project.githubUrl && (
 							<button
+								type="button"
+								aria-label="View project on GitHub"
 								onClick={(e) => {
 									e.preventDefault();
-									window.open(
-										project.githubUrl,
-										"_blank",
+									openExternal(
+										project.githubUrl!,
 									);
 								}}
-								className="bg-white dark:bg-gray-800 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-								title="View Code">
+								className="h-11 w-11 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 transition">
 								<FontAwesomeIcon
 									icon={faGithub}
-									className="w-4 h-4"
+									className="text-white"
 								/>
 							</button>
 						)}
+
+						{project.demoUrl && (
+							<button
+								type="button"
+								aria-label="View live demo"
+								onClick={(e) => {
+									e.preventDefault();
+									openExternal(project.demoUrl!);
+								}}
+								className="h-11 w-11 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 transition">
+								<FontAwesomeIcon
+									icon={faPlay}
+									className="text-white"
+								/>
+							</button>
+						)}
+
+						<div className="h-11 w-11 rounded-full bg-brand-lemon/20 flex items-center justify-center">
+							<FontAwesomeIcon
+								icon={faExternalLinkAlt}
+								className="text-brand-lemon"
+							/>
+						</div>
 					</div>
 
-					{/* Category */}
-					<div className="absolute top-3 left-3">
-						<span className="text-[10px] sm:text-xs md:text-sm bg-brand-green/90 dark:bg-brand-lemon/90 text-white dark:text-brand-green px-2 sm:px-3 py-1 rounded-full font-medium">
+					{project.category && (
+						<span className="absolute top-3 right-3 rounded-full bg-brand-green px-3 py-1 text-xs font-semibold text-white">
 							{project.category}
 						</span>
-					</div>
+					)}
 				</div>
 
 				{/* Content */}
-				<div className="flex flex-col flex-1 px-3 sm:px-4 pb-3">
-					<h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-1 line-clamp-2 group-hover:text-brand-lemon transition-colors">
+				<div className="flex flex-1 flex-col p-4">
+					<h3 className="mb-1 line-clamp-2 font-bold text-sm sm:text-base group-hover:text-brand-lemon transition-colors">
 						{project.title}
 					</h3>
-					<p className="text-[10px] sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mb-2 line-clamp-3 flex-1">
+
+					<p className="mb-3 flex-1 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">
 						{project.description}
 					</p>
 
-					{/* Tags */}
-					<div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
-						{project.tags
-							.slice(0, 3)
-							.map((tag) => (
-								<span
-									key={tag}
-									className="text-[9px] sm:text-xs md:text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
-									{tag}
+					{project.tags?.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{project.tags
+								.slice(0, 3)
+								.map((tag) => (
+									<span
+										key={tag}
+										className="rounded-md bg-brand-lemon/10 px-2 py-1 text-xs text-brand-green">
+										{tag}
+									</span>
+								))}
+							{project.tags.length > 3 && (
+								<span className="rounded-md bg-gray-200 px-2 py-1 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+									+{project.tags.length - 3}
 								</span>
-							))}
-						{project.tags.length > 3 && (
-							<span className="text-[8px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-								+{project.tags.length - 3} more
-							</span>
-						)}
-					</div>
-
-					{/* View Details */}
-					<div className="mt-auto inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm md:text-base lg:text-base text-brand-green dark:text-brand-lemon group-hover:gap-2.5 transition-all font-medium">
-						View Details
-						<FontAwesomeIcon
-							icon={faExternalLinkAlt}
-							className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4"
-						/>
-					</div>
+							)}
+						</div>
+					)}
 				</div>
 			</article>
 		</Link>

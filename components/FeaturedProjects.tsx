@@ -1,20 +1,22 @@
 "use client";
+
 import {
-	useRef,
 	useEffect,
+	useRef,
 	useState,
 } from "react";
 import ProjectCard from "./ProjectCard";
-import { projects } from "@/data/projects";
 import ProjectCardSkeleton from "./ProjectCardSkeleton";
+import { projects } from "@/data/projects";
 
 export default function FeaturedProjects() {
 	const scrollRef = useRef<HTMLDivElement>(null);
-	const setRef = useRef<HTMLDivElement>(null);
-	const [isPaused, setIsPaused] = useState(false);
+	const trackRef = useRef<HTMLDivElement>(null);
+
+	const [paused, setPaused] = useState(false);
 	const [loading, setLoading] = useState(true);
 
-	// Simulate loading
+	// Simulated loading
 	useEffect(() => {
 		const timer = setTimeout(
 			() => setLoading(false),
@@ -23,50 +25,46 @@ export default function FeaturedProjects() {
 		return () => clearTimeout(timer);
 	}, []);
 
-	// Infinite scroll animation
+	// ✅ Desktop-only infinite scroll
 	useEffect(() => {
-		if (loading) return;
+		if (loading || paused) return;
+		if (typeof window === "undefined") return;
+		if (window.innerWidth < 1024) return;
 
 		const container = scrollRef.current;
-		const set = setRef.current;
-		if (!container || !set || isPaused) return;
+		const track = trackRef.current;
+		if (!container || !track) return;
 
-		let animationId: number;
-		let scrollPosition = container.scrollLeft;
-		const setWidth = set.offsetWidth;
+		let raf: number;
+		let position = container.scrollLeft;
+		const trackWidth = track.scrollWidth;
 
-		const scroll = () => {
-			scrollPosition += 0.5;
-			if (scrollPosition >= setWidth)
-				scrollPosition = 0;
-			container.scrollLeft = scrollPosition;
-			animationId = requestAnimationFrame(scroll);
+		const animate = () => {
+			position += 0.5;
+			if (position >= trackWidth) position = 0;
+			container.scrollLeft = position;
+			raf = requestAnimationFrame(animate);
 		};
 
-		animationId = requestAnimationFrame(scroll);
-		return () =>
-			cancelAnimationFrame(animationId);
-	}, [isPaused, loading]);
-
-	const handleHover = (hovered: boolean) =>
-		setIsPaused(hovered);
+		raf = requestAnimationFrame(animate);
+		return () => cancelAnimationFrame(raf);
+	}, [paused, loading]);
 
 	return (
-		<section className="overflow-hidden py-6 md:py-8">
-			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+		<section className="py-8">
+			<div className="mx-auto max-w-6xl px-4">
 				{/* Header */}
-				<div className="text-center mb-8 md:mb-12">
+				<div className="mb-10 text-center">
 					<h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
 						Featured Projects
 					</h2>
-					<p className="text-gray-600 dark:text-gray-400 mt-2 text-sm sm:text-base md:text-lg">
-						Hover over a project to pause and
-						explore
+					<p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+						Explore selected work
 					</p>
 				</div>
 
-				{/* Cards */}
-				{loading ? (
+				{/* Loading */}
+				{loading && (
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{Array.from({ length: 6 }).map(
 							(_, i) => (
@@ -74,47 +72,48 @@ export default function FeaturedProjects() {
 							),
 						)}
 					</div>
-				) : (
+				)}
+
+				{/* ✅ MOBILE & TABLET: GRID */}
+				{!loading && (
+					<div className="grid gap-4 sm:grid-cols-2 lg:hidden">
+						{projects.map((project) => (
+							<ProjectCard
+								key={project.id}
+								project={project}
+							/>
+						))}
+					</div>
+				)}
+
+				{/* ✅ DESKTOP: AUTO-SCROLL CAROUSEL */}
+				{!loading && (
 					<div
 						ref={scrollRef}
-						className="flex gap-4 sm:gap-6 px-2 sm:px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory max-sm:flex-wrap max-sm:justify-center">
-						{/* Original Set */}
+						className="relative hidden lg:block overflow-hidden">
 						<div
-							ref={setRef}
-							className="flex gap-4 sm:gap-6 shrink-0 min-w-max">
+							ref={trackRef}
+							className="flex gap-6">
 							{projects.map((project) => (
 								<ProjectCard
 									key={project.id}
 									project={project}
-									onHover={handleHover}
+									onHover={setPaused}
 								/>
 							))}
-						</div>
 
-						{/* Clone for infinite scroll (desktop only) */}
-						<div className="hidden sm:flex gap-4 sm:gap-6 shrink-0 min-w-max">
+							{/* clone for infinite loop */}
 							{projects.map((project) => (
 								<ProjectCard
 									key={`${project.id}-clone`}
 									project={project}
-									onHover={handleHover}
+									onHover={setPaused}
 								/>
 							))}
 						</div>
 					</div>
 				)}
 			</div>
-
-			{/* Custom scrollbar hide */}
-			<style jsx>{`
-				.scrollbar-hide::-webkit-scrollbar {
-					display: none;
-				}
-				.scrollbar-hide {
-					-ms-overflow-style: none;
-					scrollbar-width: none;
-				}
-			`}</style>
 		</section>
 	);
 }
