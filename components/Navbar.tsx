@@ -1,7 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import {
+	useState,
+	useEffect,
+	useRef,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
 	faArrowRight,
@@ -12,6 +16,7 @@ import {
 	faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTheme } from "./ThemeProvider";
+import Image from "next/image";
 
 interface NavItem {
 	label: string;
@@ -22,6 +27,7 @@ interface DropdownItem {
 	label: string;
 	href: string;
 	description?: string;
+	Image?: string;
 }
 
 const mainNavLinks: NavItem[] = [
@@ -31,10 +37,26 @@ const mainNavLinks: NavItem[] = [
 ];
 
 const activitiesDropdown: DropdownItem[] = [
-	{ label: "Projects", href: "/project", description: "View our work" },
-	{ label: "Testimonials", href: "/testimonials", description: "Client feedback" },
-	{ label: "Experience", href: "/experiences", description: "Our journey" },
-	{ label: "Reviews", href: "/reviews", description: "Customer reviews" },
+	{
+		label: "Projects",
+		href: "/project",
+		description: "View our work",
+	},
+	{
+		label: "Testimonials",
+		href: "/testimonials",
+		description: "Client feedback",
+	},
+	{
+		label: "Experience",
+		href: "/experiences",
+		description: "Our journey",
+	},
+	{
+		label: "Reviews",
+		href: "/reviews",
+		description: "Customer reviews",
+	},
 ];
 
 interface NavLinkProps {
@@ -61,9 +83,10 @@ function NavLink({
 					isActive
 						? "bg-linear-to-r from-brand-lemon to-brand-green text-white shadow-lg"
 						: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-				}`}
-			>
-				<span className="relative z-10">{label}</span>
+				}`}>
+				<span className="relative z-10">
+					{label}
+				</span>
 				<FontAwesomeIcon
 					icon={faArrowRight}
 					className={`relative z-10 text-sm transition-all duration-300 ${
@@ -86,9 +109,10 @@ function NavLink({
 				isActive
 					? "text-white"
 					: "text-gray-700 dark:text-gray-300 hover:text-brand-green dark:hover:text-brand-lemon"
-			}`}
-		>
-			<span className="relative z-10">{label}</span>
+			}`}>
+			<span className="relative z-10">
+				{label}
+			</span>
 
 			{isActive && (
 				<div className="absolute inset-0 bg-linear-to-r from-brand-lemon to-brand-green rounded-xl shadow-lg shadow-brand-lemon/30 dark:shadow-brand-green/30" />
@@ -103,42 +127,71 @@ function NavLink({
 
 export default function Navbar() {
 	const pathname = usePathname();
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] =
+		useState(false);
 	const [scrolled, setScrolled] = useState(false);
-	const [dropdownOpen, setDropdownOpen] = useState(false);
-	const [mobileActivitiesOpen, setMobileActivitiesOpen] = useState(false);
-	const dropdownRef = useRef<HTMLDivElement>(null);
-	const { theme, toggleTheme, mounted } = useTheme();
+	const [dropdownOpen, setDropdownOpen] =
+		useState(false);
+	const [
+		mobileActivitiesOpen,
+		setMobileActivitiesOpen,
+	] = useState(false);
+	const dropdownRef =
+		useRef<HTMLDivElement>(null);
+	const { theme, toggleTheme, mounted } =
+		useTheme();
 
 	// Check if current page is in activities
-	const isActivitiesActive = activitiesDropdown.some(
-		(item) => pathname === item.href
-	);
+	const isActivitiesActive =
+		activitiesDropdown.some(
+			(item) => pathname === item.href,
+		);
 
 	useEffect(() => {
-		const handleScroll = () => setScrolled(window.scrollY > 20);
-		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
+		const handleScroll = () =>
+			setScrolled(window.scrollY > 20);
+		window.addEventListener(
+			"scroll",
+			handleScroll,
+		);
+		return () =>
+			window.removeEventListener(
+				"scroll",
+				handleScroll,
+			);
 	}, []);
 
 	// Lock scroll when mobile menu is open
 	useEffect(() => {
-		document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
+		document.body.style.overflow = isMenuOpen
+			? "hidden"
+			: "unset";
 	}, [isMenuOpen]);
 
 	// Close dropdown when clicking outside
 	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
+		const handleClickOutside = (
+			event: MouseEvent,
+		) => {
 			if (
 				dropdownRef.current &&
-				!dropdownRef.current.contains(event.target as Node)
+				!dropdownRef.current.contains(
+					event.target as Node,
+				)
 			) {
 				setDropdownOpen(false);
 			}
 		};
 
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		document.addEventListener(
+			"mousedown",
+			handleClickOutside,
+		);
+		return () =>
+			document.removeEventListener(
+				"mousedown",
+				handleClickOutside,
+			);
 	}, []);
 
 	return (
@@ -155,7 +208,14 @@ export default function Navbar() {
 						href="/"
 						className="flex items-center gap-2 group z-100 text:sm">
 						<div className="relative w-10 h-10 bg-linear-to-br from-brand-lemon to-brand-green rounded-xl flex items-center justify-center text-white font-bold md:text-lg text-sm transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-brand-lemon/30">
-							G
+							<Image
+								src="/og-image.png" // directly from public folder
+								alt="Logo"
+								width={28}
+								height={28}
+								className="object-contain"
+							/>
+
 							<div className="absolute inset-0 bg-linear-to-tr from-white/20 to-transparent rounded-xl" />
 						</div>
 						<span className="md:text-lg text-sm font-bold tracking-tight bg-linear-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
