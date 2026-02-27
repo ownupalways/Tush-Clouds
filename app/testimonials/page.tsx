@@ -29,20 +29,36 @@ export default function TestimonialsPage() {
     fetchTestimonials();
   }, []);
 
-  const fetchTestimonials = async () => {
-    try {
-      const res = await fetch("/api/testimonials");
-      const data = await res.json();
-      
-      console.log("Testimonials data:", data);
-      
-      setTestimonials(data.data || []);
-    } catch (error) {
-      console.error("Error fetching testimonials:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchTestimonials = async () => {
+		try {
+			console.log("Fetching testimonials...");
+			const res = await fetch(
+				"/api/testimonials",
+			);
+			console.log("Response status:", res.status);
+			console.log(
+				"Response headers:",
+				res.headers.get("content-type"),
+			);
+
+			// Get the raw text first
+			const text = await res.text();
+			console.log("Raw response:", text);
+
+			// Try to parse it
+			const data = JSON.parse(text);
+			console.log("Parsed data:", data);
+
+			setTestimonials(data.data || []);
+		} catch (error) {
+			console.error(
+				"Error fetching testimonials:",
+				error,
+			);
+		} finally {
+			setLoading(false);
+		}
+ };
 
   const handleReviewSuccess = () => {
     fetchTestimonials();
