@@ -1,4 +1,4 @@
-"use client";
+    "use client";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -54,7 +54,7 @@ export default function Footer() {
 							</span>
 						</Link>
 						<p className="mt-3 text-sm text-white/70">
-							Engineering Excellence, Exceeding
+							Tech Engineering Excellence, Exceeding
 							Expectations
 						</p>
 					</div>
@@ -68,7 +68,7 @@ export default function Footer() {
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="footer-link">
+										className="hover:footer-link">
 										{link.label}
 									</Link>
 								</li>

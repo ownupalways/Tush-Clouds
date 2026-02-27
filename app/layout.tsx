@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 		"https://tush-clouds.vercel.app",
 	), // ✅ Add this line
 	title:
-		"TUSH-CLOUDS | Engineering Excellence, Exceeding Expectations",
+		"TUSH-CLOUDS | Tech Engineering Excellence, Exceeding Expectations",
 	description:
 		"Your trusted partner in digital transformation. Full-stack web development, cloud solutions, and innovative software engineering. Professional portfolio showcasing modern projects and real-world experiences.",
 
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
 	// Controls how your site appears when shared on social media
 	openGraph: {
 		title:
-			"TUSH-CLOUDS | Engineering Excellence, Exceeding Expectations",
+			"TUSH-CLOUDS |Tech Engineering Excellence, Exceeding Expectations",
 		description:
 			"Your trusted partner in digital transformation. Full-stack developer specializing in modern web solutions and cloud technologies.",
 		type: "website",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
 				url: "/og-image.png",
 				width: 1200,
 				height: 630,
-				alt: "TUSH-CLOUDS - Engineering Excellence, Exceeding Expectations",
+				alt: "TUSH-CLOUDS - Tech Engineering Excellence, Exceeding Expectations",
 			},
 		],
 	},
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
 	// ========================================
 	// Optimizes appearance when shared on Twitter/X
     twitter: {
-        card: "summary_large_image", title: "TUSH-CLOUDS | Engineering Excellence, Exceeding Expectations", description: "Full-stack developer & digital transformation partner.", images: ["/twitter-card.png"],
+        card: "summary_large_image", title: "TUSH-CLOUDS | Tech Engineering Excellence, Exceeding Expectations", description: "Full-stack developer & digital transformation partner.", images: ["/twitter-card.png"],
     },
     // 1200x600px },
 	// ========================================

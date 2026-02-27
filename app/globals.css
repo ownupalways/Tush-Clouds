@@ -183,3 +183,10 @@
     animation: none;
   }
 }
+
+/*Footer links*/
+.footer-link {
+    background-color:rgba(176, 179, 177, 0.3) ;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
