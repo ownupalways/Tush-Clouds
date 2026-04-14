@@ -7,32 +7,36 @@ export default function Hero() {
 				{/* Text Content */}
 				<div className="text-center lg:text-left">
 					<span className="inline-block mb-4 px-4 py-1 rounded-full bg-violet-50 text-violet-600 text-sm font-medium">
-						Web Developer • Tech Coach
+						Web Developer • Tech Coach • Community
+						Builder
 					</span>
 
 					<h1 className="text-4xl md:text-5xl xl:text-6xl font-bold leading-tight mb-6">
 						I Build{" "}
 						<span className="text-violet-500">
-							Modern Websites
+							AI-Powered Web Applications
 						</span>
-						<br /> & Train Developers
+						<br /> That Solve Real Business
+						Problems
 					</h1>
 
 					<p className="text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
-						I help individuals and teams learn
-						modern web development through
-						hands‑on coaching — online or
-						in‑person — while also building fast,
-						scalable production websites.
+						I help businesses and individuals
+						launch scalable, high-performance web
+						applications using modern technologies
+						like Next.js and TypeScript — while
+						also mentoring developers with
+						practical, real-world skills.
 					</p>
 
 					<div className="flex flex-wrap justify-center lg:justify-start gap-4">
 						<a
 							href="/contact"
 							className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium">
-							Book a Session{" "}
+							Work With Me{" "}
 							<ArrowRight size={18} />
 						</a>
+
 						<a
 							href="/services"
 							className="btn-secondary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium border-2 border-gray-800 hover:border-gray-500 transition-colors duration-300">
@@ -53,18 +57,20 @@ export default function Hero() {
 
 						<ul className="space-y-4 text-gray-600">
 							<li>
-								⚡ Build high‑performance Next.js
-								apps
+								⚡ Build scalable,
+								production-ready web apps
 							</li>
 							<li>
-								🎓 One‑on‑One & Group Tech
-								Training
+								🎓 Train developers with
+								real-world projects
 							</li>
 							<li>
-								🌍 Online & In‑Person Coaching
+								🌍 Support individuals & teams
+								globally
 							</li>
 							<li>
-								🚀 Career‑focused Mentorship
+								🚀 Help businesses launch and grow
+								online
 							</li>
 						</ul>
 					</div>

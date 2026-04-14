@@ -1,7 +1,7 @@
 // components/ProjectCardSkeleton.tsx
 export default function ProjectCardSkeleton() {
 	return (
-		<div className="card animate-pulse cursor-pointer group relative overflow-hidden min-w-[280px] sm:min-w-[320px] md:min-w-[350px] h-full flex flex-col">
+		<div className="card animate-pulse cursor-pointer group relative overflow-hidden min-w-70 sm:min-w-[320px] md:min-w-87.5 h-full flex flex-col">
 			{/* Image Placeholder */}
 			<div className="relative h-48 mb-4 rounded-lg bg-gray-200 dark:bg-gray-700 overflow-hidden shimmer" />
 

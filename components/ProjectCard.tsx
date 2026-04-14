@@ -35,7 +35,7 @@ export default function ProjectCard({
 	return (
 		<Link
 			href={`/projects/${project.id}`}
-			className="block w-[280px] sm:w-[320px] shrink-0 snap-start"
+			className="block w-70 sm:w-[320px] shrink-0 snap-start"
 			onMouseEnter={() => onHover?.(true)}
 			onMouseLeave={() => onHover?.(false)}>
 			<article
@@ -116,8 +116,25 @@ export default function ProjectCard({
 						{project.title}
 					</h3>
 
+					<p className="text-xs text-gray-500 mb-2">
+						{project.category === "AI" &&
+							"AI-powered solution"}
+						{project.category === "Web" &&
+							"Full-stack web system"}
+						{project.category === "Ecommerce" &&
+							"Business-ready platform"}
+					</p>
+
 					<p className="mb-3 flex-1 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">
 						{project.description}
+					</p>
+					<p className="text-xs text-violet-500 mb-3">
+						Designed to solve real user and
+						business needs.
+					</p>
+					<p className="text-xs text-gray-500 mb-3">
+						Built for performance, scalability,
+						and real-world usability.
 					</p>
 
 					{project.tags?.length > 0 && (

@@ -6,7 +6,7 @@ export const projects: Project[] = [
 		id: "ecommerce-platform",
 		title: "E-Commerce Platform",
 		description:
-			"A full-stack e-commerce solution with payment integration, inventory management, and real-time analytics.",
+			"A full-stack e-commerce system designed to help businesses sell products online with secure payments, inventory tracking, and real-time order insights.",
 		image: "/projects/ecommerce.jpg",
 		tags: [
 			"React.js",
@@ -25,9 +25,8 @@ export const projects: Project[] = [
 		id: "admin-dashboard",
 		title: "Admin Dashboard",
 		description:
-			"Comprehensive admin dashboard with analytics, user management, and system monitoring capabilities with proper customer order update and management.",
-		image:
-			"/projects/ecommAdmin.bmp",
+			"A real-time admin system for managing users, orders, and business operations with live updates, analytics, and performance monitoring.",
+		image: "/projects/ecommAdmin.bmp",
 		tags: [
 			"React",
 			"Node.js",
@@ -41,11 +40,10 @@ export const projects: Project[] = [
 	},
 	{
 		id: "landing-page",
-		title: "Custom Landing Page",
+		title: "High-Converting Landing Page",
 		description:
-			"A modern, conversion-optimized and responsive landing page featuring  advanced theming, reusable components and production-ready code with smooth animations.",
-		image:
-			"/projects/landingpage.bmp",
+			"A modern, conversion-focused landing page built to help businesses attract users, improve engagement, and increase conversions with optimized UI and performance.",
+		image: "/projects/landingpage.bmp",
 		tags: [
 			"Next.js",
 			"TypeScript",

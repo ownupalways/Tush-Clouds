@@ -56,10 +56,14 @@ export default function FeaturedProjects() {
 				{/* Header */}
 				<div className="mb-10 text-center">
 					<h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-						Featured Projects
+						Real-World Web Applications
 					</h2>
+
 					<p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
-						Explore selected work
+						A selection of production-style
+						projects I design and build for
+						scalability, performance, and real
+						business use cases.
 					</p>
 				</div>
 
