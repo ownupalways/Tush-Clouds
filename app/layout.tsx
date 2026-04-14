@@ -1,4 +1,4 @@
-import "./globals.css";
+import "@/app/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -89,10 +89,15 @@ export const metadata: Metadata = {
 	// TWITTER CARD
 	// ========================================
 	// Optimizes appearance when shared on Twitter/X
-    twitter: {
-        card: "summary_large_image", title: "TUSH-CLOUDS | Tech Engineering Excellence, Exceeding Expectations", description: "Full-stack developer & digital transformation partner.", images: ["/twitter-card.png"],
-    },
-    // 1200x600px },
+	twitter: {
+		card: "summary_large_image",
+		title:
+			"TUSH-CLOUDS | Tech Engineering Excellence, Exceeding Expectations",
+		description:
+			"Full-stack developer & digital transformation partner.",
+		images: ["/twitter-card.png"],
+	},
+	// 1200x600px },
 	// ========================================
 	// ROBOTS & INDEXING
 	// ========================================
@@ -137,49 +142,54 @@ export const metadata: Metadata = {
 // ROOT LAYOUT COMPONENT
 // ============================================================================
 export default function RootLayout({
-    children,
+	children,
 }: {
-    children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-    return (
-        <html lang="en" suppressHydrationWarning>
-            <head>
-                {/* Preconnect to external domains for better performance */}
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://widget.cloudinary.com" />
-            </head>
-            
-            <body className="antialiased min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-                <SessionProvider>
-                    <ThemeProvider>
-                        {/* ================================ */}
-                        {/* SITE HEADER / NAVIGATION        */}
-                        {/* ================================ */}
-                        <Navbar />
-                        
-                        {/* ================================ */}
-                        {/* MAIN CONTENT AREA                */}
-                        {/* ================================ */}
-                        <main className="section-container pt-28 pb-20 min-h-screen">
-                            {children}
-                        </main>
-                        
-                        {/* ================================ */}
-                        {/* SITE FOOTER                      */}
-                        {/* ================================ */}
-                        <Footer />
-                        
-                        {/* ================================ */}
-                        {/* EXTERNAL SCRIPTS                 */}
-                        {/* ================================ */}
-                        {/* Cloudinary Widget - Loaded lazily for image uploads */}
-                        <Script 
-                            src="https://widget.cloudinary.com/v2.0/global/all.js" 
-                            strategy="lazyOnload"
-                        />
-                    </ThemeProvider>
-                </SessionProvider>
-            </body>
-        </html>
-    );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<head>
+				{/* Preconnect to external domains for better performance */}
+				<link
+					rel="preconnect"
+					href="https://fonts.googleapis.com"
+				/>
+				<link
+					rel="preconnect"
+					href="https://widget.cloudinary.com"
+				/>
+			</head>
+			<body className="antialiased min-h-screen transition-colors duration-300">
+				<SessionProvider>
+					<ThemeProvider>
+						{/* ================================ */}
+						{/* SITE HEADER / NAVIGATION        */}
+						{/* ================================ */}
+						<Navbar />
+
+						{/* ================================ */}
+						{/* MAIN CONTENT AREA                */}
+						{/* ================================ */}
+						<main className="section-container pt-28 pb-20 min-h-screen">
+							{children}
+						</main>
+
+						{/* ================================ */}
+						{/* SITE FOOTER                      */}
+						{/* ================================ */}
+						<Footer />
+
+						{/* ================================ */}
+						{/* EXTERNAL SCRIPTS                 */}
+						{/* ================================ */}
+						{/* Cloudinary Widget - Loaded lazily for image uploads */}
+						<Script
+							src="https://widget.cloudinary.com/v2.0/global/all.js"
+							strategy="lazyOnload"
+						/>
+					</ThemeProvider>
+				</SessionProvider>
+			</body>
+		</html>
+	);
 }

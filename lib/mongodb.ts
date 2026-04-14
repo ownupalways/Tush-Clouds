@@ -8,52 +8,72 @@ if (!MONGODB_URI) {
 	);
 }
 
-/**
- * Global cache (VERY important for Next.js / Vercel serverless)
- */
 interface MongooseCache {
 	conn: typeof mongoose | null;
 	promise: Promise<typeof mongoose> | null;
 }
 
+// ✅ Correct global augmentation for TypeScript
 declare global {
-	/** eslint-disable-next-line no-var */
 	var mongooseCache: MongooseCache | undefined;
 }
 
-// ✅ Initialize cache safely
-if (!global.mongooseCache) {
-	global.mongooseCache = {
+// ✅ Initialize the global cache
+let cached = global.mongooseCache;
+
+if (!cached) {
+	cached = global.mongooseCache = {
 		conn: null,
 		promise: null,
 	};
 }
 
-const cached = global.mongooseCache;
-
 async function connectDB(): Promise<
 	typeof mongoose
 > {
-	// ✅ If already connected, return immediately
-	if (cached.conn) {
-		return cached.conn;
+	if (cached!.conn) {
+		return cached!.conn;
 	}
 
-	// ✅ Create connection promise once
-	if (!cached.promise) {
-		cached.promise = mongoose.connect(
-			MONGODB_URI!,
-			{
-				bufferCommands: false, // critical for serverless speed
-			},
+	if (!cached!.promise) {
+		console.log(
+			"📡 Initializing MongoDB connection...",
 		);
+		cached!.promise = mongoose
+			.connect(MONGODB_URI!, {
+				bufferCommands: true,
+			})
+			.then((m) => m); // Ensure promise resolves to mongoose instance
 	}
 
-	cached.conn = await cached.promise;
+	try {
+		const conn = await cached!.promise;
+		cached!.conn = conn;
 
-	console.log("✅ MongoDB connected");
+		const { host, name } = conn.connection;
+		console.log(
+			"-----------------------------------------",
+		);
+		console.log(`✅ DATABASE CONNECTED`);
+		console.log(`🏠 Host: ${host}`);
+		console.log(`📂 Database: ${name}`);
+		console.log(
+			"-----------------------------------------",
+		);
 
-	return cached.conn;
+		return cached!.conn; // 👈 CRITICAL: You must return the connection!
+	} catch (error: unknown) {
+		cached!.promise = null;
+		const errorMessage =
+			error instanceof Error
+				? error.message
+				: "Unknown error";
+		console.error(
+			"❌ MONGODB CONNECTION ERROR:",
+			errorMessage,
+		);
+		throw error;
+	}
 }
 
 export default connectDB;
