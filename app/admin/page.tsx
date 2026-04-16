@@ -169,141 +169,201 @@ export default function AdminDashboard() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-bg-secondary p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* HEADER */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-linear text-3xl font-bold">
-            Admin Dashboard
-          </h1>
+		<div className="min-h-screen bg-bg-secondary p-4 md:p-8">
+			<div className="max-w-6xl mx-auto">
+				{/* HEADER */}
+				<header className="flex justify-between items-center mb-8">
+					<h1 className="text-linear text-3xl font-bold">
+						Admin Dashboard
+					</h1>
 
-          <button
-            onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-white flex items-center gap-2"
-          >
-            <FontAwesomeIcon icon={faSignOutAlt} />
-            Logout
-          </button>
-        </header>
+					<button
+						onClick={() =>
+							signOut({
+								callbackUrl: "/admin/login",
+							})
+						}
+						className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-white flex items-center gap-2">
+						<FontAwesomeIcon
+							icon={faSignOutAlt}
+						/>
+						Logout
+					</button>
+				</header>
 
-        {/* TABS */}
-        <nav className="flex flex-wrap gap-2 mb-8 p-1.5 bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl w-fit">
-          <TabButton
-            active={activeTab === "contacts"}
-            onClick={() => setActiveTab("contacts")}
-            icon={faEnvelope}
-            label="Contacts"
-            count={contacts.length}
-          />
-          <TabButton
-            active={activeTab === "testimonials"}
-            onClick={() => setActiveTab("testimonials")}
-            icon={faComment}
-            label="Testimonials"
-            count={testimonials.length}
-          />
-          <TabButton
-            active={activeTab === "reviews"}
-            onClick={() => setActiveTab("reviews")}
-            icon={faStar}
-            label="Reviews"
-            count={reviews.length}
-          />
-        </nav>
+				{/* TABS */}
+				<nav className="flex flex-wrap gap-2 mb-8 p-1.5 bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl w-fit">
+					<TabButton
+						active={activeTab === "contacts"}
+						onClick={() =>
+							setActiveTab("contacts")
+						}
+						icon={faEnvelope}
+						label="Contacts"
+						count={contacts.length}
+					/>
+					<TabButton
+						active={activeTab === "testimonials"}
+						onClick={() =>
+							setActiveTab("testimonials")
+						}
+						icon={faComment}
+						label="Testimonials"
+						count={testimonials.length}
+					/>
+					<TabButton
+						active={activeTab === "reviews"}
+						onClick={() =>
+							setActiveTab("reviews")
+						}
+						icon={faStar}
+						label="Reviews"
+						count={reviews.length}
+					/>
+				</nav>
 
-        {/* CONTENT */}
-        <div className="relative min-h-100">
-          {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/20 backdrop-blur-sm rounded-3xl">
-              <LoadingSpinner size="lg" />
-            </div>
-          )}
+				{/* CONTENT */}
+				<div className="relative min-h-100">
+					{loading && (
+						<div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/20 backdrop-blur-sm rounded-3xl">
+							<LoadingSpinner size="lg" />
+						</div>
+					)}
 
-          {/* EMPTY STATE */}
-          {!loading && currentData.length === 0 && (
-            <div className="text-center py-20 text-gray-500">
-              No {activeTab} found.
-            </div>
-          )}
+					{/* EMPTY STATE */}
+					{!loading &&
+						currentData.length === 0 && (
+							<div className="text-center py-20 text-gray-500">
+								No {activeTab} found.
+							</div>
+						)}
 
-          {/* DATA */}
-          <div className={`grid gap-4 ${loading ? "opacity-30" : ""}`}>
-            {activeTab === "contacts" &&
-              contacts.map((c) => (
-                <div
-                  key={c._id}
-                  className="card border-l-4 border-l-brand-green p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm"
-                >
-                  <div className="flex justify-between">
-                    <div>
-                      <h3 className="font-bold">{c.name}</h3>
-                      <p className="text-sm text-green-500">
-                        {c.email}
-                      </p>
-                    </div>
+					{/* DATA */}
+					<div
+						className={`grid gap-4 ${loading ? "opacity-30" : ""}`}>
+						{activeTab === "contacts" &&
+							contacts.map((c) => (
+								<div
+									key={c._id}
+									className="card border-l-4 border-l-brand-green p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+									<div className="flex justify-between">
+										<div>
+											<h3 className="font-bold">
+												{c.name}
+											</h3>
+											<p className="text-sm text-green-500">
+												{c.email}
+											</p>
+										</div>
 
-                    <div className="flex gap-2">
-                      <button
-                        disabled={actionId === c._id}
-                        onClick={() =>
-                          handleAction(c._id, () =>
-                            updateItem("contacts", c._id, {
-                              status:
-                                c.status === "new" ? "read" : "new",
-                            })
-                          )
-                        }
-                      >
-                        {actionId === c._id
-                          ? "Updating..."
-                          : "Toggle"}
-                      </button>
+										<div className="flex gap-2">
+											<button
+												disabled={
+													actionId === c._id
+												}
+												onClick={() =>
+													handleAction(
+														c._id,
+														() =>
+															updateItem(
+																"contacts",
+																c._id,
+																{
+																	status:
+																		c.status ===
+																		"new"
+																			? "read"
+																			: "new",
+																},
+															),
+													)
+												}>
+												{actionId === c._id
+													? "Updating..."
+													: "Toggle"}
+											</button>
 
-                      <button
-                        onClick={() =>
-                          deleteItem("contacts", c._id)
-                        }
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </div>
-                  </div>
+											<button
+												onClick={() =>
+													deleteItem(
+														"contacts",
+														c._id,
+													)
+												}>
+												<FontAwesomeIcon
+													icon={faTrash}
+												/>
+											</button>
+										</div>
+									</div>
 
-                  <p className="mt-3 italic">
-                    &quot;{c.message}&quot;
-                  </p>
-                </div>
-              ))}
+									<p className="mt-3 italic">
+										&quot;{c.message}&quot;
+									</p>
+								</div>
+							))}
 
-            {(activeTab === "testimonials" ||
-              activeTab === "reviews") && (
-              <div className="grid md:grid-cols-2 gap-4">
-                {currentData.map((item) => (
-                  <DashboardCard
-                    key={item._id}
-                    item={item}
-                    isActionLoading={actionId === item._id}
-                    onUpdate={(id, updates) =>
-                      handleAction(id, () =>
-                        updateItem(
-                          activeTab as UpdateableTab,
-                          id,
-                          updates
-                        )
-                      )
-                    }
-                    onDelete={(id) =>
-                      handleAction(id, () =>
-                        deleteItem(activeTab, id)
-                      )
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+						{activeTab === "testimonials" && (
+							<div className="grid md:grid-cols-2 gap-4">
+								{testimonials.map((item) => (
+									<DashboardCard
+										key={item._id}
+										item={item}
+										isActionLoading={
+											actionId === item._id
+										}
+										onUpdate={(id, updates) =>
+											handleAction(id, () =>
+												updateItem(
+													"testimonials",
+													id,
+													updates,
+												),
+											)
+										}
+										onDelete={(id) =>
+											handleAction(id, () =>
+												deleteItem(
+													"testimonials",
+													id,
+												),
+											)
+										}
+									/>
+								))}
+							</div>
+						)}
+
+						{activeTab === "reviews" && (
+							<div className="grid md:grid-cols-2 gap-4">
+								{reviews.map((item) => (
+									<DashboardCard
+										key={item._id}
+										item={item}
+										isActionLoading={
+											actionId === item._id
+										}
+										onUpdate={(id, updates) =>
+											handleAction(id, () =>
+												updateItem(
+													"reviews",
+													id,
+													updates,
+												),
+											)
+										}
+										onDelete={(id) =>
+											handleAction(id, () =>
+												deleteItem("reviews", id),
+											)
+										}
+									/>
+								))}
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }
