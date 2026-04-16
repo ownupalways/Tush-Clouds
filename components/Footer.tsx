@@ -1,131 +1,131 @@
-    "use client";
+"use client";
+
+import { useActionState } from "react";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faEnvelope,
-    faPhone,
-    faLocationDot,
+  faEnvelope,
+  faPhone,
+  faLocationDot,
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 
+// 1. Data defined outside to prevent re-renders and clear "unused" warnings
 const footerLinks = [
-    { label: "Home", href: "/" },
-    { label: "Services", href: "/services" },
-    { label: "About", href: "/about" },
-    { label: "Experience", href: "/experiences" },
-    { label: "Testimonials", href: "/testimonials" },
-    { label: "Reviews", href: "/reviews" },
-    { label: "Contact", href: "/contact" },
+  { label: "Home", href: "/" },
+  { label: "Services", href: "/services" },
+  { label: "About", href: "/about" },
+  { label: "Experience", href: "/experiences" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const socialLinks = [
-    {
-        name: "Email",
-        href: "mailto:oluwadipegodwin@gmail.com",
-        icon: faEnvelope,
-    },
-    {
-        name: "Phone",
-        href: "tel:+2347066382167",
-        icon: faPhone,
-    },
-    {
-        name: "Location",
-        href: "#contact",
-        icon: faLocationDot,
-    },
+  { name: "Email", href: "mailto:oluwadipegodwin@gmail.com", icon: faEnvelope },
+  { name: "Phone", href: "tel:+2347066382167", icon: faPhone },
+  { name: "Location", href: "#contact", icon: faLocationDot },
 ];
 
 export default function Footer() {
-    const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
 
-    return (
-			<footer className="bg-brand-green dark:bg-brand-green-900 text-white py-12 md:py-16">
-				<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-					{/* Logo */}
-					<div className="text-center mb-8">
-						<Link
-							href="/"
-							className="inline-block text-2xl md:text-3xl font-bold tracking-tight">
-							<span className="text-white hover:text-brand-lemon transition-colors duration-300 transform hover:scale-105 inline-block">
-								TUSH
-								<span className="text-brand-lemon">
-									-CLOUDS
-								</span>
-							</span>
-						</Link>
-						<p className="mt-3 text-sm text-white/70">
-							Tech Engineering Excellence, Exceeding
-							Expectations
-						</p>
-					</div>
+  // 2. Initialize Action State (Server Action + Initial State)
+  const [state, formAction, isPending] = useActionState(subscribeToNewsletter, null);
 
-					{/* Navigation Links */}
-					<nav
-						className="mb-8"
-						aria-label="Footer Navigation">
-						<ul className="flex flex-wrap justify-center items-center gap-4 md:gap-6 lg:gap-8">
-							{footerLinks.map((link) => (
-								<li key={link.href}>
-									<Link
-										href={link.href}
-										className="hover:footer-link">
-										{link.label}
-									</Link>
-								</li>
-							))}
-						</ul>
-					</nav>
+  return (
+    <footer className="bg-brand-green dark:bg-brand-green-900 text-white pt-16 pb-8 border-t border-white/5">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          
+          {/* COLUMN 1: BRAND IDENTITY */}
+          <div className="space-y-4">
+            <Link href="/" className="inline-block group">
+              <span className="text-2xl font-bold tracking-tight transition-transform duration-300 group-hover:scale-105 inline-block">
+                TUSH<span className="text-brand-lemon">-CLOUDS</span>
+              </span>
+            </Link>
+            <p className="text-sm text-white/70 leading-relaxed max-w-xs">
+              Engineering excellence through modern full-stack solutions. 
+              Specializing in Next.js, React, and MongoDB architecture.
+            </p>
+          </div>
 
-					{/* Social Links */}
-					<div className="flex justify-center items-center gap-4 md:gap-6 mb-8">
-						{socialLinks.map((social) => (
-							<a
-								key={social.name}
-								href={social.href}
-								target={
-									social.href.startsWith("http")
-										? "_blank"
-										: undefined
-								}
-								rel={
-									social.href.startsWith("http")
-										? "noopener noreferrer"
-										: undefined
-								}
-								aria-label={social.name}
-								className="footer-social"
-								title={social.name}>
-								<FontAwesomeIcon
-									icon={social.icon}
-									className="text-lg md:text-xl"
-								/>
-							</a>
-						))}
-					</div>
+          {/* COLUMN 2: NAVIGATION */}
+          <div>
+            <h4 className="text-brand-lemon font-semibold uppercase tracking-wider text-xs mb-6">Explore</h4>
+            <ul className="grid grid-cols-2 gap-y-3">
+              {footerLinks.map((link) => (
+                <li key={link.href}>
+                  <Link 
+                    href={link.href} 
+                    className="text-sm text-white/80 hover:text-brand-lemon transition-all duration-200"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-					{/* Divider */}
-					<div className="border-t border-white/20 mb-6" />
+          {/* COLUMN 3: NEWSLETTER & SOCIAL */}
+          <div className="space-y-6">
+            <h4 className="text-brand-lemon font-semibold uppercase tracking-wider text-xs">Stay Connected</h4>
+            
+            <form action={formAction} className="relative flex items-center group">
+              <input 
+                name="email" 
+                type="email" 
+                required
+                disabled={isPending}
+                placeholder={state?.success ? "Check your inbox!" : "Join the newsletter"}
+                className={`w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 pr-12 text-sm focus:outline-none focus:ring-2 transition-all 
+                  ${state?.success ? "border-brand-lemon ring-brand-lemon/30" : "focus:ring-brand-lemon/50 focus:border-brand-lemon"}`}
+              />
+              <button 
+                type="submit"
+                disabled={isPending}
+                className="absolute right-1.5 p-2 rounded-lg bg-linear-to-br from-brand-lemon to-brand-green-400 text-brand-green hover:scale-105 active:scale-95 transition-all shadow-lg disabled:opacity-50"
+              >
+                {isPending ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
+                ) : (
+                  <FontAwesomeIcon icon={faArrowRight} className="text-sm" />
+                )}
+              </button>
+            </form>
 
-					{/* Copyright & Admin Link */}
-					<div className="text-center space-y-2">
-						<p className="text-xs md:text-sm text-white/70">
-							&copy; {currentYear} TUSH-CLOUDS.
-							All rights reserved.
-						</p>
-						<p className="text-xs text-white/50">
-							Crafted with passion and precision
-						</p>
-						{/* Discrete Admin Link */}
-						<div className="pt-2">
-							<Link
-								href="/admin/login"
-								className="footer-admin-link"
-								title="Admin Access">
-								Admin
-							</Link>
-						</div>
-					</div>
-				</div>
-			</footer>
-		);
+            {/* Error Message Feedback */}
+            {state?.error && (
+              <p className="text-[10px] text-red-300 bg-red-900/20 py-1 px-3 rounded border border-red-900/40 animate-pulse">
+                {state.error}
+              </p>
+            )}
+
+            {/* Social Links Rendering (Clears "unused" warning) */}
+            <div className="flex items-center gap-6 pt-4 border-t border-white/10">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  aria-label={link.name}
+                  className="text-white/60 hover:text-brand-lemon transition-colors duration-200 hover:scale-110"
+                >
+                  <FontAwesomeIcon icon={link.icon} className="text-lg" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM BAR */}
+        <div className="border-t border-white/10 pt-8 text-center">
+          <p className="text-xs text-white/40 tracking-widest uppercase">
+            &copy; {currentYear} TUSH-CLOUDS. Managed by Godwin.dev
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
 }

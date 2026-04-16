@@ -60,8 +60,9 @@ export default function Testimonial() {
 
 	const fetchTestimonials = async () => {
 		try {
+			// 1. Updated endpoint with query parameter
 			const res = await fetch(
-				"/api/testimonials",
+				"/api/testimonials?featured=true",
 			);
 			const data = await res.json();
 
@@ -82,6 +83,7 @@ export default function Testimonial() {
 					}),
 				);
 
+				// 2. Combine static and featured database testimonials
 				setTestimonials([
 					...staticTestimonials,
 					...dbTestimonials,
@@ -176,7 +178,7 @@ export default function Testimonial() {
 						className="pb-12 testimonial-swiper">
 						{testimonials.map((t) => (
 							<SwiperSlide key={t._id}>
-								<div className="card group cursor-pointer flex flex-col justify-between h-full p-5 sm:p-6 md:p-7 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 min-h-[320px] sm:min-h-[360px] md:min-h-[400px] lg:min-h-[420px] mb-10">
+								<div className="card group cursor-pointer flex flex-col justify-between h-full p-5 sm:p-6 md:p-7 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 min-h-80 sm:min-h-90 md:min-h-100 lg:min-h-105 mb-10">
 									<div>
 										<FontAwesomeIcon
 											icon={faQuoteLeft}
