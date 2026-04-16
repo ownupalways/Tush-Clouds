@@ -3,15 +3,16 @@
 import { useActionState } from "react";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
 import Link from "next/link";
+import { useSession } from "next-auth/react"; // 1. Import session hook
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEnvelope,
   faPhone,
   faLocationDot,
   faArrowRight,
+  faLock, // For admin icon
 } from "@fortawesome/free-solid-svg-icons";
 
-// 1. Data defined outside to prevent re-renders and clear "unused" warnings
 const footerLinks = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
@@ -30,8 +31,8 @@ const socialLinks = [
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { data: session } = useSession(); // 2. Access session status
 
-  // 2. Initialize Action State (Server Action + Initial State)
   const [state, formAction, isPending] = useActionState(subscribeToNewsletter, null);
 
   return (
@@ -66,6 +67,19 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              
+              {/* 3. Conditional Admin Link */}
+              {session && (
+                <li>
+                  <Link 
+                    href="/admin" 
+                    className="text-sm text-brand-lemon font-bold hover:brightness-110 transition-all duration-200 flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faLock} className="text-[10px]" />
+                    Dashboard
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -96,14 +110,12 @@ export default function Footer() {
               </button>
             </form>
 
-            {/* Error Message Feedback */}
             {state?.error && (
               <p className="text-[10px] text-red-300 bg-red-900/20 py-1 px-3 rounded border border-red-900/40 animate-pulse">
                 {state.error}
               </p>
             )}
 
-            {/* Social Links Rendering (Clears "unused" warning) */}
             <div className="flex items-center gap-6 pt-4 border-t border-white/10">
               {socialLinks.map((link) => (
                 <a
