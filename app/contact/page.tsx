@@ -12,7 +12,7 @@ export default function ContactPage() {
 		setForm({ ...form, [e.target.name]: e.target.value });
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setStatus("loading");
 		setErrorMsg("");
