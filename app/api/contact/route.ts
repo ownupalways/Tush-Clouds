@@ -1,121 +1,85 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/mongodb";
-import Contact from "@/models/Contact";
+import { Resend } from "resend";
+import clientPromise from "@/lib/mongodb-client";
+import { ContactNotificationEmail } from "../email/ContactNotification";
 
-/**
- * 🚀 CRITICAL FOR PERFORMANCE
- * This route must always be dynamic
- */
-export const dynamic = "force-dynamic";
+// Initialize Resend - Ensure RESEND_API_KEY is in your .env file
+const resend = new Resend(
+	process.env.RESEND_API_KEY,
+);
 
-/**
- * Ensures stable runtime for MongoDB
- */
-export const runtime = "nodejs";
-
-/**
- * POST — Create new contact message
- */
 export async function POST(request: Request) {
 	try {
-		// Guard against empty or invalid body
-		const contentType = request.headers.get(
-			"content-type",
-		);
-
-		if (
-			!contentType ||
-			!contentType.includes("application/json")
-		) {
-			return NextResponse.json(
-				{ error: "Invalid request format" },
-				{ status: 400 },
-			);
-		}
-
 		const body = await request.json();
-		const { name, email, message } = body ?? {};
+		const { name, email, message } = body;
 
-		// Validate required fields
-		if (
-			!name ||
-			!email ||
-			!message ||
-			typeof name !== "string" ||
-			typeof email !== "string" ||
-			typeof message !== "string"
-		) {
+		// 1. Basic Validation: Ensure no empty fields are sent to DB
+		if (!name || !email || !message) {
 			return NextResponse.json(
-				{ error: "All fields are required" },
+				{ error: "Missing required fields" },
 				{ status: 400 },
 			);
 		}
 
-		// Email format validation
-		const emailRegex =
-			/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		// 2. Connect to MongoDB and Save the message
+		const client = await clientPromise;
+		const db = client.db("tush_cloud");
 
-		if (!emailRegex.test(email)) {
-			return NextResponse.json(
-				{ error: "Invalid email format" },
-				{ status: 400 },
-			);
+		const result = await db
+			.collection("contacts")
+			.insertOne({
+				name,
+				email,
+				message,
+				status: "new", // Default status for admin dashboard filtering
+				createdAt: new Date().toISOString(),
+			});
+
+		// 3. Trigger Professional Email Notification via Resend
+		if (result.acknowledged) {
+			try {
+				await resend.emails.send({
+					// Use onboarding@resend.dev for testing; update to your domain later
+					from: "Tush-Cloud <onboarding@resend.dev>",
+					to: ["oluwadipegodwin@gmail.com"],
+					subject: `🚀 New Lead: ${name}`,
+					react: ContactNotificationEmail({
+						name,
+						email,
+						message,
+					}),
+				});
+			} catch (emailError: unknown) {
+				// We log email failures but don't stop the request
+				// because the lead is already safely in the Database.
+				const msg =
+					emailError instanceof Error
+						? emailError.message
+						: "Email service error";
+				console.error(
+					"Email notification failed:",
+					msg,
+				);
+			}
 		}
-
-		// Connect once (cached internally)
-		await connectDB();
-
-		const contact = await Contact.create({
-			name: name.trim(),
-			email: email.trim().toLowerCase(),
-			message: message.trim(),
-			status: "new",
-		});
 
 		return NextResponse.json(
-			{
-				success: true,
-				message: "Message sent successfully",
-				id: contact._id,
-			},
+			{ success: true, id: result.insertedId },
 			{ status: 201 },
 		);
-	} catch (error) {
-		console.error("Contact POST error:", error);
-
-		return NextResponse.json(
-			{ error: "Internal server error" },
-			{ status: 500 },
+	} catch (error: unknown) {
+		// Strict TypeScript handling to avoid 'any' type
+		const errorMessage =
+			error instanceof Error
+				? error.message
+				: "Internal Server Error";
+		console.error(
+			"Submission API Error:",
+			errorMessage,
 		);
-	}
-}
-
-/**
- * GET — Admin-only contact fetch
- * (Should be protected later with auth)
- */
-export async function GET() {
-	try {
-		await connectDB();
-
-		const contacts = await Contact.find()
-			.sort({ createdAt: -1 })
-			.limit(50)
-			.lean(); // ⚡ performance boost
 
 		return NextResponse.json(
-			{
-				success: true,
-				count: contacts.length,
-				data: contacts,
-			},
-			{ status: 200 },
-		);
-	} catch (error) {
-		console.error("Contact GET error:", error);
-
-		return NextResponse.json(
-			{ error: "Failed to fetch contacts" },
+			{ error: errorMessage },
 			{ status: 500 },
 		);
 	}
