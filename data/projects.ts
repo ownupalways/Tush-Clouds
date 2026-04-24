@@ -15,9 +15,24 @@ export const projects: Project[] = [
 			"MongoDB",
 		],
 		demoUrl: "https://demo.example.com",
-		githubUrl:
-			"https://github.com/ownupalways/AIG_Fashion",
 		liveUrl: "https://aiefashionz.com",
+		category: "Web Application",
+		featured: true,
+	},
+	{
+		id: "syd-and-co",
+		title: "E-Commerce Platform",
+		description:
+			"A full-stack e-commerce system designed to help businesses sell products online with secure payments, inventory tracking, and real-time order insights.",
+		image: "/projects/syd&co.bmp",
+		tags: [
+			"React.js",
+			"TypeScript",
+			"Stripe",
+			"MongoDB",
+		],
+		demoUrl: "https://demo.example.com",
+		liveUrl: "https://sydandco-inc.com",
 		category: "Web Application",
 		featured: true,
 	},
@@ -50,9 +65,7 @@ export const projects: Project[] = [
 			"React",
 			"Tailwindcss",
 		],
-		demoUrl: "https://demo.example.com/chatbot",
-		githubUrl:
-			"https://github.com/ownupalways/landingPage",
+		demoUrl: "https://demo.landingpage.com",
 		liveUrl:
 			"https://landingpage-psi-nine-74.vercel.app/",
 		category: "Web Application",

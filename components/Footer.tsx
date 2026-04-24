@@ -134,7 +134,7 @@ export default function Footer() {
         {/* BOTTOM BAR */}
         <div className="border-t border-white/10 pt-8 text-center">
           <p className="text-xs text-white/40 tracking-widest uppercase">
-            &copy; {currentYear} TUSH-CLOUDS. Managed by Godwin.dev
+            &copy; {currentYear} TUSH-CLOUDS. Managed by Oluwadipe Godwin. All rights reserved.
           </p>
         </div>
       </div>

@@ -22,9 +22,8 @@ export default function TermsOfService() {
 						</h2>
 						<p>
 							By accessing{" "}
-							<strong>TUSH-CLOUD</strong> or the{" "}
-							<strong>SydneyShopping</strong>{" "}
-							ecommerce store, you agree to be
+							<strong>TUSH-CLOUD</strong>  {" "}
+							portfolio, you agree to be
 							bound by these terms. If you do not
 							agree to any part of these terms,
 							you may not use our services.

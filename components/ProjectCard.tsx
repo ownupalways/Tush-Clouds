@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import {
 	faExternalLinkAlt,
 	faPlay,
@@ -61,24 +60,7 @@ export default function ProjectCard({
 
 					{/* Overlay */}
 					<div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-						{project.githubUrl && (
-							<button
-								type="button"
-								aria-label="View project on GitHub"
-								onClick={(e) => {
-									e.preventDefault();
-									openExternal(
-										project.githubUrl!,
-									);
-								}}
-								className="h-11 w-11 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 transition">
-								<FontAwesomeIcon
-									icon={faGithub}
-									className="text-white"
-								/>
-							</button>
-						)}
-
+						
 						{project.demoUrl && (
 							<button
 								type="button"

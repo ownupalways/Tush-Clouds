@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import {
   faExternalLinkAlt,
   faPlay,
@@ -81,17 +80,7 @@ export default async function ProjectPage({
                 Visit Live Site
               </a>
             )}
-            {project.githubUrl && (
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary inline-flex items-center gap-2"
-              >
-                <FontAwesomeIcon icon={faGithub} />
-                View Code
-              </a>
-            )}
+            
           </div>
         </div>
 
@@ -162,17 +151,7 @@ export default async function ProjectPage({
                       Live Site
                     </a>
                   )}
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-brand-green dark:hover:text-brand-lemon transition-colors"
-                    >
-                      <FontAwesomeIcon icon={faGithub} className="w-4 h-4" />
-                      GitHub
-                    </a>
-                  )}
+                 
                 </div>
               </div>
             </div>

@@ -196,3 +196,24 @@
   padding: 5px 10px;
   border-radius: 5px;
 }
+
+
+.testimonial-swiper {
+  align-items: stretch !important;
+}
+
+.testimonial-swiper .swiper-wrapper {
+  align-items: stretch !important;
+}
+
+.testimonial-swiper .swiper-slide {
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column;
+}
+
+.testimonial-swiper .swiper-slide > div {
+  flex: 1;
+  height: 100%;
+}
+
