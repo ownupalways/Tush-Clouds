@@ -14,62 +14,67 @@ import TestimonialSkeleton from "./TestimonialSkeleton";
 import { getAvatarUrl } from "@/utils/avatar";
 
 interface TestimonialApiResponse {
-  _id: string;
-  image?: string;
-  name: string;
-  position?: string;
-  company?: string;
-  message: string;
-  rating?: number;
+	_id: string;
+	image?: string;
+	name: string;
+	position?: string;
+	company?: string;
+	message: string;
+	rating?: number;
 }
 
 const staticTestimonials: TestimonialApiResponse[] = [
-  {
-    _id: "static-1",
-    image: "/Images/Tomiwa.jpg",
-    name: "Tomiwa Oluwadipe",
-    position: "CEO",
-    company: "Tech Startup",
-    message: "Working with Godwin was an absolute pleasure. His attention to detail and commitment to excellence made our project a success.",
-    rating: 5,
-  },
+	{
+		_id: "static-1",
+		image: "/images/Tomiwa.jpg",
+		name: "Tomiwa Oluwadipe",
+		position: "CEO",
+		company: "Tech Startup",
+		message:
+			"Working with Godwin was an absolute pleasure. His attention to detail and commitment to excellence made our project a success.",
+		rating: 5,
+	},
 ];
 
+async function loadTestimonials(): Promise<TestimonialApiResponse[]> {
+	const res = await fetch("/api/testimonials?featured=true");
+	const data = await res.json();
+
+	if (data.success && Array.isArray(data.data)) {
+		return data.data.map((t: TestimonialApiResponse) => ({
+			...t,
+			image: t.image || getAvatarUrl(t.name),
+			rating: t.rating ?? 5,
+		}));
+	}
+	return [];
+}
+
 export default function Testimonial() {
-  const [testimonials, setTestimonials] = useState<TestimonialApiResponse[]>(staticTestimonials);
-  const [loading, setLoading] = useState(true);
+	const [testimonials, setTestimonials] =
+		useState<TestimonialApiResponse[]>(staticTestimonials);
+	const [loading, setLoading] = useState(true);
 
-  // 1. Unified fetch logic
-  const fetchTestimonials = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/testimonials?featured=true");
-      const data = await res.json();
+	useEffect(() => {
+		loadTestimonials()
+			.then((db) =>
+				setTestimonials([...staticTestimonials, ...db]),
+			)
+			.catch(console.error)
+			.finally(() => setLoading(false));
+	}, []);
 
-      if (data.success && Array.isArray(data.data)) {
-        const dbTestimonials = data.data.map((t: TestimonialApiResponse) => ({
-          ...t,
-          image: t.image || getAvatarUrl(t.name),
-          rating: t.rating ?? 5,
-        }));
+	const handleReviewSuccess = () => {
+		setLoading(true);
+		loadTestimonials()
+			.then((db) =>
+				setTestimonials([...staticTestimonials, ...db]),
+			)
+			.catch(console.error)
+			.finally(() => setLoading(false));
+	};
 
-        // Merge static and DB results
-        setTestimonials([...staticTestimonials, ...dbTestimonials]);
-      }
-    } catch (err) {
-      console.error("Error fetching testimonials:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
-
-  const handleReviewSuccess = () => fetchTestimonials();
-
-  return (
+	return (
 		<section
 			id="testimonial"
 			className="py-12 md:py-20 bg-gray-50 dark:bg-gray-900/50">
@@ -83,9 +88,8 @@ export default function Testimonial() {
 						</span>
 					</h2>
 					<p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
-						Hear from partners who have
-						experienced our commitment to
-						excellence first-hand.
+						Hear from partners who have experienced
+						our commitment to excellence first-hand.
 					</p>
 
 					<div className="flex flex-wrap justify-center gap-4">
@@ -104,23 +108,18 @@ export default function Testimonial() {
 				{/* Dynamic Content Area */}
 				{loading ? (
 					<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-						{Array.from({ length: 3 }).map(
-							(_, i) => (
-								<TestimonialSkeleton key={i} />
-							),
-						)}
+						{Array.from({ length: 3 }).map((_, i) => (
+							<TestimonialSkeleton key={i} />
+						))}
 					</div>
 				) : testimonials.length === 0 ? (
 					<div className="text-center py-20 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
-						<div className="text-5xl mb-4">
-							✨
-						</div>
+						<div className="text-5xl mb-4">✨</div>
 						<h3 className="text-xl font-bold mb-2 dark:text-white">
 							No testimonials yet
 						</h3>
 						<p className="text-gray-500 dark:text-gray-400 mb-6">
-							Be the first to share your
-							experience!
+							Be the first to share your experience!
 						</p>
 						<AddReviewButton
 							type="testimonial"
@@ -144,6 +143,7 @@ export default function Testimonial() {
 							768: { slidesPerView: 2 },
 							1024: { slidesPerView: 3 },
 						}}
+						style={{ alignItems: "stretch" }}
 						className="pb-16 testimonial-swiper">
 						{testimonials.map((t) => (
 							<SwiperSlide
@@ -159,19 +159,17 @@ export default function Testimonial() {
 											&quot;{t.message}&quot;
 										</p>
 										<div className="flex gap-1 mb-8">
-											{[...Array(5)].map(
-												(_, i) => (
-													<FontAwesomeIcon
-														key={i}
-														icon={faStar}
-														className={`text-sm ${
-															i < (t.rating ?? 5)
-																? "text-brand-lemon"
-																: "text-gray-200 dark:text-gray-700"
-														}`}
-													/>
-												),
-											)}
+											{[...Array(5)].map((_, i) => (
+												<FontAwesomeIcon
+													key={i}
+													icon={faStar}
+													className={`text-sm ${
+														i < (t.rating ?? 5)
+															? "text-brand-lemon"
+															: "text-gray-200 dark:text-gray-700"
+													}`}
+												/>
+											))}
 										</div>
 									</div>
 
@@ -192,8 +190,7 @@ export default function Testimonial() {
 											<h5 className="font-bold text-gray-900 dark:text-white truncate">
 												{t.name}
 											</h5>
-											{(t.position ||
-												t.company) && (
+											{(t.position || t.company) && (
 												<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
 													{t.position}{" "}
 													{t.position &&
