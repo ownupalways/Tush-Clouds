@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import clientPromise from "@/lib/mongodb-client";
-import { ContactNotificationEmail } from "../email/ContactNotification";
-
+import { ContactNotificationEmail } from "@/app/email/ContactNotification";
 // Initialize Resend - Ensure RESEND_API_KEY is in your .env file
 const resend = new Resend(
 	process.env.RESEND_API_KEY,
