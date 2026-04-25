@@ -1,5 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuoteLeft, faStar } from "@fortawesome/free-solid-svg-icons";
@@ -11,70 +13,64 @@ import AddReviewButton from "@/components/AddReviewButton";
 import TestimonialSkeleton from "@/components/TestimonialSkeleton";
 
 interface Testimonial {
-  _id: string;
-  name: string;
-  position?: string;
-  company?: string;
-  message: string;
-  rating: number;
-  image?: string;
-  createdAt: string;
+	_id: string;
+	name: string;
+	position?: string;
+	company?: string;
+	message: string;
+	rating: number;
+	image?: string;
+	createdAt: string;
+}
+
+async function loadTestimonials(): Promise<Testimonial[]> {
+	const res = await fetch("/api/testimonials");
+	if (!res.ok) throw new Error(`API Error: ${res.status}`);
+	const contentType = res.headers.get("content-type");
+	if (!contentType?.includes("application/json")) {
+		throw new Error("Response is not JSON");
+	}
+	const data = await res.json();
+	return data.data || [];
 }
 
 export default function TestimonialsPage() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+	const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+	const [loading, setLoading] = useState(true);
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const buttonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
+	useEffect(() => {
+		loadTestimonials()
+			.then((data) => setTestimonials(data))
+			.catch(console.error)
+			.finally(() => setLoading(false));
+	}, []);
 
- const fetchTestimonials = async () => {
-		try {
-			console.log("Fetching testimonials...");
-			const res = await fetch(
-				"/api/testimonials",
-			);
-			console.log("Response status:", res.status);
-			console.log(
-				"Response headers:",
-				res.headers.get("content-type"),
-			);
-
-			// Get the raw text first
-			const text = await res.text();
-			console.log("Raw response:", text);
-
-			// Try to parse it
-			const data = JSON.parse(text);
-			console.log("Parsed data:", data);
-
-			setTestimonials(data.data || []);
-		} catch (error) {
-			console.error(
-				"Error fetching testimonials:",
-				error,
-			);
-		} finally {
-			setLoading(false);
+	useEffect(() => {
+		if (searchParams.get("action") === "add") {
+			setTimeout(() => buttonRef.current?.click(), 600);
 		}
- };
+	}, [searchParams]);
 
-  const handleReviewSuccess = () => {
-    fetchTestimonials();
-  };
+	const handleReviewSuccess = () => {
+		setLoading(true);
+		loadTestimonials()
+			.then((data) => setTestimonials(data))
+			.catch(console.error)
+			.finally(() => setLoading(false));
+		setTimeout(() => router.push("/"), 1500);
+	};
 
-  return (
+	return (
 		<div className="min-h-screen py-16 md:py-24">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-12">
-					<h1 className="mb-4">
-						What Our Clients Say
-					</h1>
+					<h1 className="mb-4">What Our Clients Say</h1>
 					<p className="mx-auto max-w-2xl mb-5">
-						Testimonials from satisfied clients
-						and partners
+						Testimonials from satisfied clients and partners
 					</p>
 				</div>
 
@@ -87,28 +83,25 @@ export default function TestimonialsPage() {
 						<TestimonialSkeleton />
 					</div>
 				) : testimonials.length === 0 ? (
-					// Empty State
 					<div className="text-center py-5">
-						<div className="text-6xl mb-4">
-							💬
-						</div>
+						<div className="text-6xl mb-4">💬</div>
 						<h3 className="text-2xl font-bold mb-2">
 							No testimonials yet
 						</h3>
 						<p className="text-gray-600 dark:text-gray-400 mb-6">
-							Be the first to share your
-							experience!
+							Be the first to share your experience!
 						</p>
 						<AddReviewButton
+							ref={buttonRef}
 							type="testimonial"
 							onSuccess={handleReviewSuccess}
 						/>
 					</div>
 				) : (
-					// Testimonials Slider with Add Review Button
 					<div>
 						<div className="flex justify-center mb-8">
 							<AddReviewButton
+								ref={buttonRef}
 								type="testimonial"
 								onSuccess={handleReviewSuccess}
 							/>
@@ -120,8 +113,7 @@ export default function TestimonialsPage() {
 							slidesPerView={1}
 							pagination={{
 								clickable: true,
-								bulletClass:
-									"swiper-pagination-bullet",
+								bulletClass: "swiper-pagination-bullet",
 								bulletActiveClass:
 									"swiper-pagination-bullet-active",
 							}}
@@ -132,44 +124,36 @@ export default function TestimonialsPage() {
 							breakpoints={{
 								1024: { slidesPerView: 2 },
 							}}
-							className="pb-12">
+							style={{ alignItems: "stretch" }}
+							className="pb-12 testimonial-swiper">
 							{testimonials.map((testimonial) => (
 								<SwiperSlide
-									key={testimonial._id}>
-									<div className="card group cursor-pointer h-full flex flex-col justify-between">
-										<div>
-											{/* Quote Icon */}
+									key={testimonial._id}
+									className="!h-auto !flex !flex-col">
+									<div className="card group cursor-pointer flex flex-col flex-1 h-full">
+										<div className="grow">
 											<FontAwesomeIcon
 												icon={faQuoteLeft}
 												className="text-3xl text-brand-green/20 dark:text-brand-lemon/20 mb-4"
 											/>
-
-											{/* Message */}
 											<p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
 												{testimonial.message}
 											</p>
-
-											{/* Star Rating */}
 											<div className="flex gap-1 mb-6">
-												{[...Array(5)].map(
-													(_, i) => (
-														<FontAwesomeIcon
-															key={i}
-															icon={faStar}
-															className={`text-sm ${
-																i <
-																(testimonial.rating ||
-																	5)
-																	? "text-brand-lemon"
-																	: "text-gray-300 dark:text-gray-600"
-															}`}
-														/>
-													),
-												)}
+												{[...Array(5)].map((_, i) => (
+													<FontAwesomeIcon
+														key={i}
+														icon={faStar}
+														className={`text-sm ${
+															i < (testimonial.rating || 5)
+																? "text-brand-lemon"
+																: "text-gray-300 dark:text-gray-600"
+														}`}
+													/>
+												))}
 											</div>
 										</div>
 
-										{/* Author Info */}
 										<div className="flex items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
 											<div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0">
 												<Image
