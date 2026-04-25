@@ -7,6 +7,80 @@ const resend = new Resend(
 	process.env.RESEND_API_KEY,
 );
 
+export async function GET(request: Request) {
+	try {
+		const client = await clientPromise;
+		const db = client.db("TUSHCLOUDSPORTFOLIO");
+		const { searchParams } = new URL(request.url);
+		const showAll =
+			searchParams.get("all") === "true";
+		const filter = showAll
+			? {}
+			: { status: "new" };
+
+		const contacts = await db
+			.collection("contacts")
+			.find(filter)
+			.sort({ createdAt: -1 })
+			.toArray();
+
+		return NextResponse.json(
+			{ success: true, data: contacts },
+			{ status: 200 },
+		);
+	} catch (error: unknown) {
+		const errorMessage =
+			error instanceof Error
+				? error.message
+				: "Internal Server Error";
+		console.error(
+			"GET Contact Error:",
+			errorMessage,
+		);
+		return NextResponse.json(
+			{ error: errorMessage },
+			{ status: 500 },
+		);
+	}
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const { id, ...updates } = await request.json();
+    const client = await clientPromise;
+    const db = client.db("TUSHCLOUDSPORTFOLIO");
+    await db.collection("contacts").updateOne(
+      { _id: new (await import("mongodb")).ObjectId(id) },
+      { $set: updates },
+    );
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
+
+    const client = await clientPromise;
+    const db = client.db("TUSHCLOUDSPORTFOLIO");
+    await db.collection("contacts").deleteOne(
+      { _id: new (await import("mongodb")).ObjectId(id) },
+    );
+    return NextResponse.json({ success: true, message: "Deleted" }, { status: 200 });
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
+}
+
+
 export async function POST(request: Request) {
 	try {
 		const body = await request.json();
@@ -22,7 +96,7 @@ export async function POST(request: Request) {
 
 		// 2. Connect to MongoDB and Save the message
 		const client = await clientPromise;
-		const db = client.db("tush_cloud");
+		const db = client.db("TUSHCLOUDSPORTFOLIO");
 
 		const result = await db
 			.collection("contacts")
