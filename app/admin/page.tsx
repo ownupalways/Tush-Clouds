@@ -23,10 +23,23 @@ import {
   TabType,
   UpdateableTab,
 } from "@/types/admin";
+import { ShareLinks } from "@/components/admin/ShareLinks";
 
-type ApiResponse<T> = {
-  data?: T[];
-};
+
+
+async function loadData(tab: TabType): Promise<(Contact | Testimonial | Review)[]> {
+  const endpoint = (() => {
+    switch (tab) {
+      case "contacts": return "/api/contact";
+      case "testimonials": return "/api/testimonials?all=true";
+      case "reviews": return "/api/reviews?all=true";
+    }
+  })();
+
+  const res = await fetch(endpoint);
+  const result = await res.json();
+  return result?.data ?? [];
+}
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -42,60 +55,68 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
 
-  // 🔥 Centralized endpoint resolver
-  const getEndpoint = (tab: TabType) => {
-    switch (tab) {
-      case "contacts":
-        return "/api/contact";
-      case "testimonials":
-        return "/api/testimonials?all=true";
-      case "reviews":
-        return "/api/reviews?all=true";
-    }
-  };
-
+ 
   // 🔥 Safe fetch
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(getEndpoint(activeTab));
-      const result: ApiResponse<Contact | Testimonial | Review> =
-        await res.json();
+ const fetchData = useCallback(() => {
+		setLoading(true);
+		loadData(activeTab)
+			.then((safeData) => {
+				switch (activeTab) {
+					case "contacts":
+						setContacts(safeData as Contact[]);
+						break;
+					case "testimonials":
+						setTestimonials(
+							safeData as Testimonial[],
+						);
+						break;
+					case "reviews":
+						setReviews(safeData as Review[]);
+						break;
+				}
+			})
+			.catch((error) => {
+				console.error(
+					"Error fetching data:",
+					error,
+				);
+				if (activeTab === "contacts")
+					setContacts([]);
+				if (activeTab === "testimonials")
+					setTestimonials([]);
+				if (activeTab === "reviews")
+					setReviews([]);
+			})
+			.finally(() => setLoading(false));
+ }, [activeTab]);
 
-      const safeData = result?.data ?? [];
+ useEffect(() => {
+		if (status === "unauthenticated") {
+			router.push("/admin/login");
+			return;
+		}
 
-      switch (activeTab) {
-        case "contacts":
-          setContacts(safeData as Contact[]);
-          break;
-        case "testimonials":
-          setTestimonials(safeData as Testimonial[]);
-          break;
-        case "reviews":
-          setReviews(safeData as Review[]);
-          break;
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-
-      // ✅ fallback safety
-      if (activeTab === "contacts") setContacts([]);
-      if (activeTab === "testimonials") setTestimonials([]);
-      if (activeTab === "reviews") setReviews([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/admin/login");
-    }
-
-    if (status === "authenticated") {
-      fetchData();
-    }
-  }, [status, router, fetchData]);
+		if (status === "authenticated") {
+			loadData(activeTab)
+				.then((safeData) => {
+					switch (activeTab) {
+						case "contacts":
+							setContacts(safeData as Contact[]);
+							break;
+						case "testimonials":
+							setTestimonials(
+								safeData as Testimonial[],
+							);
+							break;
+						case "reviews":
+							setReviews(safeData as Review[]);
+							break;
+					}
+				})
+				.catch(console.error)
+				.finally(() => setLoading(false));
+		}
+ }, [status, router, activeTab]);
 
   // 🔥 Action wrapper
   const handleAction = async (id: string, fn: () => Promise<void>) => {
@@ -190,6 +211,9 @@ export default function AdminDashboard() {
 						Logout
 					</button>
 				</header>
+
+            {/* SHARE LINKS */}
+				<ShareLinks />
 
 				{/* TABS */}
 				<nav className="flex flex-wrap gap-2 mb-8 p-1.5 bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl w-fit">
