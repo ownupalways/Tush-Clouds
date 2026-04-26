@@ -1,14 +1,7 @@
 "use client";
 
-import {
-	useState,
-	useEffect,
-	useRef,
-} from "react";
-import {
-	useSearchParams,
-	useRouter,
-} from "next/navigation";
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import AddReviewButton from "@/components/AddReviewButton";
@@ -28,14 +21,9 @@ async function loadReviews(): Promise<{
 	averageRating: number;
 }> {
 	const res = await fetch("/api/reviews");
-	if (!res.ok)
-		throw new Error(`API Error: ${res.status}`);
-	const contentType = res.headers.get(
-		"content-type",
-	);
-	if (
-		!contentType?.includes("application/json")
-	) {
+	if (!res.ok) throw new Error(`API Error: ${res.status}`);
+	const contentType = res.headers.get("content-type");
+	if (!contentType?.includes("application/json")) {
 		throw new Error("Response is not JSON");
 	}
 	const data = await res.json();
@@ -45,17 +33,13 @@ async function loadReviews(): Promise<{
 	};
 }
 
-export default function ReviewsPage() {
-	const [reviews, setReviews] = useState<
-		Review[]
-	>([]);
-	const [averageRating, setAverageRating] =
-		useState(0);
+function ReviewsPageContent() {
+	const [reviews, setReviews] = useState<Review[]>([]);
+	const [averageRating, setAverageRating] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const searchParams = useSearchParams();
 	const router = useRouter();
-	const buttonRef =
-		useRef<HTMLButtonElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	const fetchReviews = () => {
 		setLoading(true);
@@ -80,10 +64,7 @@ export default function ReviewsPage() {
 
 	useEffect(() => {
 		if (searchParams.get("action") === "add") {
-			setTimeout(
-				() => buttonRef.current?.click(),
-				600,
-			);
+			setTimeout(() => buttonRef.current?.click(), 600);
 		}
 	}, [searchParams]);
 
@@ -92,11 +73,7 @@ export default function ReviewsPage() {
 		setTimeout(() => router.push("/"), 1500);
 	};
 
-	
-	const renderStars = (
-		rating: number,
-		filled: boolean = true,
-	) => {
+	const renderStars = (rating: number, filled: boolean = true) => {
 		return [...Array(5)].map((_, i) => (
 			<FontAwesomeIcon
 				key={i}
@@ -117,12 +94,9 @@ export default function ReviewsPage() {
 			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-16">
-					<h1 className="mb-4">
-						Customer Reviews
-					</h1>
+					<h1 className="mb-4">Customer Reviews</h1>
 					<p className="text-xl md:text-2xl text-text-secondary mb-8">
-						See what our customers think about our
-						work
+						See what our customers think about our work
 					</p>
 
 					{!loading && reviews.length > 0 && (
@@ -131,15 +105,11 @@ export default function ReviewsPage() {
 								{averageRating.toFixed(1)}
 							</div>
 							<div className="mb-3 flex justify-center">
-								{renderStars(
-									Math.round(averageRating),
-								)}
+								{renderStars(Math.round(averageRating))}
 							</div>
 							<p className="text-text-secondary mb-6">
 								Based on {reviews.length}{" "}
-								{reviews.length === 1
-									? "review"
-									: "reviews"}
+								{reviews.length === 1 ? "review" : "reviews"}
 							</p>
 							<AddReviewButton
 								ref={buttonRef}
@@ -172,8 +142,7 @@ export default function ReviewsPage() {
 								No reviews yet
 							</h3>
 							<p className="text-lg text-text-secondary mb-6">
-								Be the first to share your
-								experience!
+								Be the first to share your experience!
 							</p>
 							<AddReviewButton
 								ref={buttonRef}
@@ -201,23 +170,18 @@ export default function ReviewsPage() {
 											{renderStars(review.rating)}
 										</div>
 									</div>
-
 									{review.category && (
 										<span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-linear-to-r from-brand-lemon-100 to-brand-green-100 dark:from-brand-lemon-900/30 dark:to-brand-green-900/30 text-brand-green-700 dark:text-brand-green-300 capitalize border border-brand-green-200 dark:border-brand-green-800">
 											{review.category}
 										</span>
 									)}
 								</div>
-
 								<p className="text-text-secondary leading-relaxed text-base md:text-lg mb-4 italic">
 									&ldquo;{review.comment}&rdquo;
 								</p>
-
 								<div className="flex items-center justify-between pt-4 border-t border-border-color">
 									<time className="text-sm text-text-tertiary">
-										{new Date(
-											review.createdAt,
-										).toLocaleDateString(
+										{new Date(review.createdAt).toLocaleDateString(
 											"en-US",
 											{
 												year: "numeric",
@@ -227,10 +191,7 @@ export default function ReviewsPage() {
 										)}
 									</time>
 									<div className="flex gap-1">
-										{renderStars(
-											review.rating,
-											false,
-										)}
+										{renderStars(review.rating, false)}
 									</div>
 								</div>
 							</div>
@@ -252,5 +213,25 @@ export default function ReviewsPage() {
 				}
 			`}</style>
 		</div>
+	);
+}
+
+export default function ReviewsPage() {
+	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen py-16 md:py-24">
+					<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+						<div className="grid gap-6 md:grid-cols-2">
+							<TestimonialSkeleton />
+							<TestimonialSkeleton />
+							<TestimonialSkeleton />
+							<TestimonialSkeleton />
+						</div>
+					</div>
+				</div>
+			}>
+			<ReviewsPageContent />
+		</Suspense>
 	);
 }
