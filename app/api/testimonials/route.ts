@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth"; 
 import connectDB from "@/lib/mongodb";
 import Testimonial from "@/models/Testimonial";
+import { Resend } from "resend";
+import { TestimonialNotificationEmail } from "@/app/email/TestimonialNotification";
 
 interface TestimonialFilter {
   approved?: boolean;
@@ -36,23 +38,79 @@ export async function GET(request: Request) {
   }
 }
 
+
+const resend = new Resend(
+	process.env.RESEND_API_KEY,
+);
+
+// Only POST changes:
+
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { name, position, company, message } = body;
+	try {
+		const body = await request.json();
+		const {
+			name,
+			position,
+			company,
+			message,
+			rating,
+			image,
+		} = body;
 
-    if (!name || !message) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+		if (!name || !message)
+			return NextResponse.json(
+				{ error: "Missing fields" },
+				{ status: 400 },
+			);
 
-    await connectDB();
-    const testimonial = await Testimonial.create({ 
-      name, position, company, message, approved: false, featured: false 
-    });
-    return NextResponse.json({ success: true, data: testimonial }, { status: 201 });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Post failed";
-    console.error("POST Error:", msg);
-    return NextResponse.json({ error: "Submission failed" }, { status: 500 });
-  }
+		await connectDB();
+		const testimonial = await Testimonial.create({
+			name,
+			position,
+			company,
+			message,
+			rating: rating ?? 5,
+			image,
+			approved: false,
+			featured: false,
+		});
+
+		// Send email notification
+		try {
+			await resend.emails.send({
+				from: "Tush-Cloud <onboarding@resend.dev>",
+				to: ["oluwadipegodwin@gmail.com"],
+				subject: `💬 New Testimonial from ${name} — Needs Approval`,
+				react: TestimonialNotificationEmail({
+					name,
+					rating: rating ?? 5,
+					message,
+					position,
+					company,
+				}),
+			});
+		} catch (emailError) {
+			console.error(
+				"Email notification failed:",
+				emailError,
+			);
+		}
+
+		return NextResponse.json(
+			{ success: true, data: testimonial },
+			{ status: 201 },
+		);
+	} catch (error: unknown) {
+		const msg =
+			error instanceof Error
+				? error.message
+				: "Post failed";
+		console.error("POST Error:", msg);
+		return NextResponse.json(
+			{ error: "Submission failed" },
+			{ status: 500 },
+		);
+	}
 }
 
 // --- PROTECTED METHODS (Uses getServerSession & authOptions) ---
