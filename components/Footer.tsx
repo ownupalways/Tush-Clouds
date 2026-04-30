@@ -50,10 +50,7 @@ export default function Footer() {
 							</span>
 						</Link>
 						<p className="text-sm text-white/70 leading-relaxed max-w-xs">
-							Engineering excellence through
-							modern full-stack solutions.
-							Specializing in Next.js, React, and
-							MongoDB architecture.
+							Tech Engineering Excellence, Exceeding Expectations. 
 						</p>
 					</div>
 
